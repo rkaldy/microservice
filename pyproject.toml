@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "microservice-template"
+version = "0.1.0"
+description = ""
+authors = [""]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.13.5"
+fastapi = "0.115.12"
+pydantic = "2.11.3"
+pydantic-settings = "2.9.1"
+alembic = "1.15.2"
+alembic-utils = "0.8.8"
+sqlalchemy = {extras=["asyncio"], version = "^2.0.40"}
+gunicorn = "23.0.0"
+typer = "0.15.4"
+asyncpg = "0.30.0"
+orjson = "3.10.18"
+prometheus-client = "0.22.0"
+sentry-sdk = {extras = ["fastapi"], version = "2.13.0"}
+
+[tool.poetry.group.dev.dependencies]
+uvicorn = "0.34.2"
+ruff = "0.11.6"
+mypy = "1.15.0"
+pre-commit = "4.2.0"
+httpx = "0.28.1"
+freezegun = "1.2.2"
+pytest = "8.3.5"
+pytest-cov = "6.2.1"
+pytest-mock = "3.14.0"
+pytest-asyncio = "0.26.0"
+python-json-logger = "3.3.0"
+pytest-httpx = "0.35.0"
