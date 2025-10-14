@@ -40,7 +40,7 @@ RUN useradd --uid 1000 --user-group --no-create-home app
 COPY src src
 
 EXPOSE 5000
-CMD ["scripts/run-api.sh"]
+#CMD ["scripts/run-api.sh"]
 
 
 FROM base AS dev
