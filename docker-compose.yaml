@@ -5,10 +5,16 @@ services:
       target: dev
       network: host
     environment:
+      LOG_LEVEL: info
       DB_HOST: postgres
       DB_NAME: db
       DB_USER: user
       DB_PASSWORD: swordfish
+    ports:
+      - "5000:80"
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
     depends_on:
       - postgres
 
