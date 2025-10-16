@@ -6,8 +6,7 @@ ENV PIP_NO_CACHE_DIR=1 \
     POETRY_VERSION=2.2 \
     POETRY_VIRTUALENVS_IN_PROJECT=true
 WORKDIR /app
-
-RUN pip install --upgrade pip && pip install "poetry==$POETRY_VERSION"
+RUN pip install poetry==$POETRY_VERSION
 
 
 FROM deps-base AS deps-dev

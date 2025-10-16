@@ -6,7 +6,8 @@ services:
       network: host
     environment:
       LOG_LEVEL: info
-      DB_HOST: postgres
+      DB_HOST: mysql
+      DB_PORT: 3306
       DB_NAME: db
       DB_USER: user
       DB_PASSWORD: swordfish
