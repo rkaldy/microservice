@@ -2,6 +2,7 @@ import contextlib
 import logging
 from typing import AsyncIterator
 
+import sqlalchemy
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -22,8 +23,8 @@ sa_metadata = MetaData(
 
 
 class AsyncEngine:
-    def __init__(self, dsn, **kwargs):
-        self._engine: AsyncEngine | None = None
+    def __init__(self, dsn, **kwargs) -> None:
+        self._engine: sqlalchemy.ext.asyncio.engine.AsyncEngine | None = None
         self.dsn = dsn
         self.config = kwargs
 
@@ -33,19 +34,21 @@ class AsyncEngine:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        await self._engine.dispose()
+        if self._engine:
+            await self._engine.dispose()
         logger.info("Disconnected from database server.")
 
     def connect(self) -> AsyncConnection:
+        if not self._engine:
+            raise RuntimeError("AsyncEngine not initialized")
         conn = self._engine.connect()
         return AsyncConnection(conn)
 
     @contextlib.asynccontextmanager
     async def begin(self) -> AsyncIterator[AsyncConnection]:
         conn = self.connect()
-        async with conn:
-            async with conn.begin():
-                yield conn
+        async with conn, conn.begin():
+            yield conn
 
     def __getattr__(self, name: str):
         return getattr(self._engine, name)

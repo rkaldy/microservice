@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from starlette.status import HTTP_200_OK
 
+from src.api.deps import get_db_conn
 from src.api.response import ORJsonResponse
 from src.api.schema import HealthcheckStatus
 from src.db.connection import AsyncConnection
-from src.api.deps import get_db_conn
 
 router = APIRouter(default_response_class=ORJsonResponse)
 
@@ -18,9 +18,7 @@ router = APIRouter(default_response_class=ORJsonResponse)
     tags=["healthcheck"],
 )
 async def liveness() -> HealthcheckStatus:
-    return HealthcheckStatus(
-        status="success", description="API is running."
-    )
+    return HealthcheckStatus(status="success", description="API is running.")
 
 
 @router.get(

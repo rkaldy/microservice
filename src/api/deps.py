@@ -7,6 +7,7 @@ from src.settings.base import settings
 
 logger = logging.getLogger(__name__)
 
+
 async def get_db_conn() -> AsyncGenerator[AsyncConnection]:
     async with AsyncEngine(settings.db_dsn) as engine, engine.connect() as conn:
         yield conn

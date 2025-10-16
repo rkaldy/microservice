@@ -1,9 +1,8 @@
-from typing import Optional, Sequence, Mapping, Any, AsyncIterator
+from typing import Any, AsyncIterator, Mapping, Optional, Sequence
 
 import sqlalchemy.ext.asyncio
-from sqlalchemy import Executable, CursorResult
+from sqlalchemy import CursorResult, Executable
 from sqlalchemy.engine.interfaces import CoreExecuteOptionsParameter
-from sqlalchemy.ext.asyncio import AsyncResult
 
 
 class AsyncConnection:
@@ -17,20 +16,25 @@ class AsyncConnection:
     async def __aexit__(self, exc_type, exc, tb) -> None:
         return await self._conn.__aexit__(exc_type, exc, tb)
 
-    async def execute(self,
-                      statement: Executable,
-                      parameters: Sequence[Mapping[str, Any]] | Mapping[str, Any] | None = None,
-                      *,
-                      execution_options: Optional[CoreExecuteOptionsParameter] = None) -> CursorResult[Any]:
-        return await self._conn.execute(statement, parameters, execution_options=execution_options)
-
-    async def stream(self,
+    async def execute(
+        self,
         statement: Executable,
         parameters: Sequence[Mapping[str, Any]] | Mapping[str, Any] | None = None,
         *,
-        execution_options: Optional[CoreExecuteOptionsParameter] = None) -> AsyncIterator[AsyncResult[Any]]:
-        async for batch in self._conn.stream(statement, parameters, execution_options=execution_options):
-            yield batch
+        execution_options: Optional[CoreExecuteOptionsParameter] = None,
+    ) -> CursorResult[Any]:
+        return await self._conn.execute(statement, parameters, execution_options=execution_options)
+
+    async def stream(
+        self,
+        statement: Executable,
+        parameters: Sequence[Mapping[str, Any]] | Mapping[str, Any] | None = None,
+        *,
+        execution_options: Optional[CoreExecuteOptionsParameter] = None,
+    ) -> AsyncIterator[Any]:
+        res = await self._conn.stream(statement, parameters, execution_options=execution_options)
+        async for row in res:
+            yield row
 
     def __getattr__(self, name: str):
         return getattr(self._conn, name)

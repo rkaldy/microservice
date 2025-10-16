@@ -35,3 +35,46 @@ pytest-mock = "^3.14.0"
 pytest-asyncio = "^0.26.0"
 python-json-logger = "^3.3.0"
 pytest-httpx = "^0.35.0"
+
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "B", "N", "PL", "I", "ASYNC", "C4", "G", "PIE", "T20", "PYI", "Q", "SIM", "ARG", "PERF", "F401"]
+fixable = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"*" = ["PLR2004"]  # magic-value-comparison
+"tests/*" = [
+    "E501", # line-too-long
+    "E712", # true-false-comparison
+    "F403", # undefined-local-with-import-star
+    "F841", # unused-variable
+    "PLR0913", # too-many-arguments
+    "PLR0915", # too-many-statements
+    "ARG001", # unused-function-argument
+    "SIM105"    # suppressible-exception
+]
+"alembic/*" = ["E402", "E501"]  # module-import-not-at-top-of-file, line-too-long
+"*/api/*" = ["B008"]  # function-call-in-default-argument
+
+[tool.ruff.lint.pylint]
+max-args = 7
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = true
+
+
+[tool.mypy]
+python_version = "3.13"
+warn_redundant_casts = true
+warn_unused_ignores = true
+plugins = [
+    "pydantic.mypy",
+    "sqlalchemy.ext.mypy.plugin",
+]
+
+#[[tool.mypy.overrides]]
+#module = "tests.*"
+#ignore_errors = true
