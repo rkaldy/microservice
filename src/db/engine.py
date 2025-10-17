@@ -47,7 +47,7 @@ class AsyncEngine:
     @contextlib.asynccontextmanager
     async def begin(self) -> AsyncIterator[AsyncConnection]:
         conn = self.connect()
-        async with conn, conn.begin():
+        async with conn.begin():
             yield conn
 
     def __getattr__(self, name: str):

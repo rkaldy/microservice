@@ -18,4 +18,4 @@ class Settings(BaseSettings):
         return f"{self.DB_PROTOCOL}://{self.DB_USER}:******@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 
-settings = Settings()
+base_settings = Settings()
