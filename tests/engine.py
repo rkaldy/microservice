@@ -5,6 +5,7 @@ import sqlalchemy as sa
 
 from src.db.connection import AsyncConnection
 from src.db.engine import AsyncEngine
+from src.settings.base import base_settings
 
 
 class TestAsyncEngine(AsyncEngine):
@@ -16,8 +17,8 @@ class TestAsyncEngine(AsyncEngine):
     """
 
     async def __aenter__(self) -> "TestAsyncEngine":
-        await self.drop_db_tables()
         await super().__aenter__()
+        await self.drop_db_tables()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -31,12 +32,22 @@ class TestAsyncEngine(AsyncEngine):
             await conn.rollback()
 
     async def drop_db_tables(self):
-        async with self.begin() as conn:
-            select_all_tables_stmt = (
-                sa.select(sa.column("tablename").label("name"))
-                .select_from(sa.text("pg_tables"))
-                .where(sa.literal_column("schemaname") == "public")
+        if "postgres" in base_settings.DB_PROTOCOL:
+            tables_stmt = sa.text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
+            async with self.begin() as conn:
+                tables = await conn.execute(tables_stmt)
+                for row in tables.fetchall():
+                    drop_stmt = sa.text(f"DROP TABLE IF EXISTS {row[0]} CASCADE")
+                    await conn.execute(drop_stmt)
+        elif "mysql" in base_settings.DB_PROTOCOL:
+            tables_stmt = sa.text(
+                "SELECT table_name FROM information_schema.tables WHERE table_schema = :db"
             )
-            for table in await conn.execute(select_all_tables_stmt):
-                stmt = sa.text(f"DROP TABLE IF EXISTS {table.name} CASCADE")
-                await conn.execute(stmt)
+            async with super().begin() as conn:
+                await conn.execute(sa.text("SET FOREIGN_KEY_CHECKS=0"))
+                tables = await conn.execute(tables_stmt.bindparams(db=base_settings.DB_NAME))
+                for row in tables.fetchall():
+                    drop_stmt = sa.text(f"DROP TABLE IF EXISTS {row[0]}")
+                    await conn.execute(drop_stmt)
+        else:
+            raise RuntimeError("Unknown database protocol", base_settings.DB_PROTOCOL)

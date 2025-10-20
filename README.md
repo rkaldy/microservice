@@ -15,6 +15,9 @@ Set desired python version in `Dockerfile` and in `pyproject.yaml`, sections `[t
 
 ### Database engine
 The template allows you to use either mysql or postgresql as database engine.
-* choose `mysql` or `postgres` as database instance in `docker-compose.yaml`
+* set appropriate db protocol, host and port in `docker-compose.yaml`
 * in `pyproject.toml` remove lines with either `asyncpg` or `aiomysql` and `cryptography` (the `cryptography` library is used for mysql connection only)
-* in class `Settings` set `DB_PROTOCOL` to `postgres+asyncpg` or `mysql+aiomysql`
+
+## Set up the environment
+
+* Run `pre-commit install` in the command line

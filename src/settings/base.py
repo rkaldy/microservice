@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    DB_PROTOCOL: str = "postgres+asyncpg"  # or mysql+aiomysql
+    DB_PROTOCOL: str
     DB_HOST: str
     DB_PORT: int
     DB_NAME: str

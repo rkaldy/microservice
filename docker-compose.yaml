@@ -6,8 +6,9 @@ services:
       network: host
     environment:
       LOG_LEVEL: info
-      DB_HOST: mysql
-      DB_PORT: 3306
+      DB_PROTOCOL: postgresql+asyncpg  # or mysql+aiomysql
+      DB_HOST: postgres  # or mysql
+      DB_PORT: 5432  # or 3306
       DB_NAME: db
       DB_USER: user
       DB_PASSWORD: swordfish
