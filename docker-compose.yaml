@@ -17,6 +17,8 @@ services:
     volumes:
       - ./src:/app/src
       - ./tests:/app/tests
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
     depends_on:
       - postgres
 

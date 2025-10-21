@@ -7,6 +7,7 @@ CONTAINER_ID ?= $(PROJECT_NAME)-api-1
 TA ?= -v --ignore=tests/e2e/ tests/
 
 build: # Build the app container
+	poetry lock
 	docker compose -p $(PROJECT_NAME) -f docker-compose.yaml build
 
 up: # Spin up the project
@@ -30,3 +31,8 @@ bash: # Start an interactive session with the project
 lint: # Run the every linting script and a format script
 	pre-commit install --install-hooks
 	pre-commit run --all-files
+
+migration: # Create alembic migration script from the current state, set MSG for migration comment message
+	docker exec -it $(CONTAINER_ID) alembic upgrade head
+	docker exec -it $(CONTAINER_ID) alembic revision --autogenerate -m "$(MSG)"
+	docker exec -it $(CONTAINER_ID) alembic upgrade head
