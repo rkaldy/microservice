@@ -5,6 +5,9 @@ from fastapi.exception_handlers import http_exception_handler
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.api.router import router
+from src.utils.log import prepare_logging
+
+prepare_logging()
 
 logger = logging.getLogger(__name__)
 

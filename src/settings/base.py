@@ -2,6 +2,9 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    APP_ENV: str
+    LOG_LEVEL: str
+
     DB_PROTOCOL: str
     DB_HOST: str
     DB_PORT: int
