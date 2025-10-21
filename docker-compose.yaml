@@ -12,6 +12,11 @@ services:
       DB_NAME: db
       DB_USER: user
       DB_PASSWORD: swordfish
+      DB_POOL_SIZE: 1
+      DB_POOL_MAX_OVERFLOW_MULTIPLIER: 0
+      DB_POOL_TIMEOUT: 10
+      DB_POOL_RECYCLE: 1800
+      DB_POOL_PRE_PING: true
     ports:
       - "5000:80"
     volumes:

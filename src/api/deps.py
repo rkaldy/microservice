@@ -1,10 +1,17 @@
 from typing import AsyncGenerator
 
+from fastapi import Depends, Request
+
 from src.db.connection import AsyncConnection
 from src.db.engine import AsyncEngine
-from src.settings.base import base_settings
 
 
-async def get_db_conn() -> AsyncGenerator[AsyncConnection]:
-    async with AsyncEngine(base_settings.db_dsn) as engine, engine.connect() as conn:
+async def get_db_engine(request: Request) -> AsyncGenerator[AsyncEngine]:
+    yield request.app.state.engine
+
+
+async def get_db_conn(
+    engine: AsyncEngine = Depends(get_db_engine),
+) -> AsyncGenerator[AsyncConnection]:
+    async with engine.connect() as conn:
         yield conn

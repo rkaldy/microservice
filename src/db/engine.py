@@ -36,7 +36,7 @@ class AsyncEngine:
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         if self._engine:
             await self._engine.dispose()
-            logger.info("Disconnected from database server.")
+        logger.info("Disconnected from database server.")
 
     def connect(self) -> AsyncConnection:
         if not self._engine:
