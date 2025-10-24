@@ -18,6 +18,7 @@ The template allows you to use either mysql or postgresql as database engine.
 * set appropriate db protocol, host and port in `docker-compose.yaml`
 * in `pyproject.toml` remove lines with either `asyncpg` or `aiomysql` and `cryptography` (the `cryptography` library is used for mysql connection only)
 
-## Set up the environment
+## Docker registry
+Set your cloud docker registry (where your app images will be stored) in Makefile if you want to build and push images directly from local computer.
 
 * Run `pre-commit install` in the command line

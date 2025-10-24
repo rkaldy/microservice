@@ -3,6 +3,11 @@ help: # Show help for each of the Makefile recipes
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m: $$(echo $$l | cut -f 2- -d'#')\n"; done
 
 PROJECT_NAME := $(shell echo "$${COMPOSE_PROJECT_NAME:-$$(basename $$(pwd))}")
+# rename to your cloud docker registry
+DOCKER_REGISTRY := europe-central2-docker.pkg.dev/microservice-template-475915/docker
+IMAGE = $(DOCKER_REGISTRY)/$(PROJECT_NAME)-api
+TAG = $(shell git rev-parse --short=8 HEAD)
+BUILD_TARGET ?= prod
 CONTAINER_ID ?= $(PROJECT_NAME)-api-1
 TA ?= -v --ignore=tests/e2e/ tests/
 
@@ -36,3 +41,7 @@ migration: # Create alembic migration script from the current state, set MSG for
 	docker exec -it $(CONTAINER_ID) alembic upgrade head
 	docker exec -it $(CONTAINER_ID) alembic revision --autogenerate -m "$(MSG)"
 	docker exec -it $(CONTAINER_ID) alembic upgrade head
+
+push: # Build image and push it to the registry. You can specify the build target (default: prod)
+	docker build -t $(IMAGE):$(TAG) --target $(BUILD_TARGET) .
+	docker push $(IMAGE):$(TAG)
