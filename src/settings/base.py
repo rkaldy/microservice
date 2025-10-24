@@ -13,10 +13,8 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
 
     DB_POOL_SIZE: int
-    DB_POOL_MAX_OVERFLOW_MULTIPLIER: float
     DB_POOL_TIMEOUT: int
     DB_POOL_RECYCLE: int
-    DB_POOL_PRE_PING: bool
 
     @property
     def db_dsn(self) -> str:
