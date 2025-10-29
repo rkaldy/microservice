@@ -1,9 +1,13 @@
+import asyncio
 import logging
+from pathlib import Path
 from typing import AsyncGenerator
 
 import pytest
+from alembic.config import Config as AlembicConfig
 from fastapi import FastAPI
 
+from alembic import command as alembic_command
 from src.api.deps import get_db_conn
 from src.app import create_api_app
 from src.db.connection import AsyncConnection
@@ -27,6 +31,12 @@ def enable_all_loggers():
 @pytest.fixture(scope="session")
 async def db_engine() -> AsyncGenerator[TestAsyncEngine]:
     async with TestAsyncEngine(base_settings.db_dsn) as engine:
+        logging.getLogger("alembic.runtime.migration").setLevel(logging.CRITICAL)
+        alembic_config_path = Path(__name__).absolute().parent / "alembic.ini"
+        upgrade_coro = asyncio.to_thread(
+            alembic_command.upgrade, AlembicConfig(str(alembic_config_path)), "head"
+        )
+        await upgrade_coro
         yield engine
 
 

@@ -21,7 +21,7 @@ services:
       - ./src:/app/src
       - ./tests:/app/tests
       - ./alembic:/app/alembic
-      - ./alembic.ini:/app/alembic.ini
+      - ./pyproject.toml:/app/pyproject.toml
     depends_on:
       - postgres
 

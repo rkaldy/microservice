@@ -61,9 +61,10 @@ def run_migrations_sync(connection):
 async def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
+    In this scenario we need to create an Engine and associate a connection with the context.
+    Alembic migration scripts run in synchronous mode, so with async db driver we need to
+    wrap the migration routine in `run_sync()`, which allows synchronous calls of async driver
+    methods.
     """
     engine = AsyncEngine(
         engine_from_config(
@@ -73,7 +74,6 @@ async def run_migrations_online() -> None:
             url=base_settings.db_dsn,
         )
     )
-
     async with engine.connect() as connection:
         await connection.run_sync(run_migrations_sync)
 

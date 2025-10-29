@@ -46,8 +46,7 @@ FROM base AS dev
 ENV APP_ENV=development
 
 COPY --from=deps-dev /app/.venv /app/.venv
-COPY src src
-COPY tests tests
+COPY src tests alembic alembic.ini pyproject.toml ./
 COPY scripts/run-api-dev.sh scripts/run-api.sh
 
 RUN chown app:app /app
@@ -58,7 +57,7 @@ FROM base AS prod
 ENV APP_ENV=production
 
 COPY --from=deps-prod /app/.venv /app/.venv
-COPY src src
+COPY src alembic alembic.ini pyproject.toml ./
 COPY scripts/run-api-prod.sh scripts/run-api.sh
 
 RUN chown -R app:app /app
