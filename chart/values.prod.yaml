@@ -1,0 +1,5 @@
+app:
+  environment: "prod"
+
+db:
+  host: 34.118.75.30

@@ -9,13 +9,14 @@ Use this template as a skeleton for you new project. You need to rewrite followi
 * rename appropriately the `src` package in `Dockerfile`, `run-api-*.sh` scripts and `enable_all_loggers()` fixture
 * add project name to `pyproject.toml`
 * add project name and description to `run_api_app()` function
+* add project name and description to `Chart.yaml`
 
 ### Python version
 Set desired python version in `Dockerfile` and in `pyproject.yaml`, sections `[tool.poetry.dependencies]` and `[tool.mypy]`
 
 ### Database engine
 The template allows you to use either mysql or postgresql as database engine.
-* set appropriate db protocol, host and port in `docker-compose.yaml`
+* set appropriate db protocol, host and port in `docker-compose.yaml`, `values.yaml` and `values-*.yaml`
 * in `pyproject.toml` remove lines with either `asyncpg` or `aiomysql` and `cryptography` (the `cryptography` library is used for mysql connection only)
 
 ## Docker registry

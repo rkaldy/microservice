@@ -1,0 +1,6 @@
+app:
+  environment: "dev"
+
+db:
+  protocol: mysql+aiomysql
+  host: 34.118.27.91
