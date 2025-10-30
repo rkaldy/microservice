@@ -37,6 +37,8 @@ RUN apt-get update && \
 RUN useradd --uid 1000 --user-group --no-create-home app
 
 COPY src src
+COPY alembic alembic
+COPY alembic.ini pyproject.toml ./
 
 EXPOSE 80
 CMD ["scripts/run-api.sh"]
@@ -46,7 +48,7 @@ FROM base AS dev
 ENV APP_ENV=development
 
 COPY --from=deps-dev /app/.venv /app/.venv
-COPY src tests alembic alembic.ini pyproject.toml ./
+COPY tests tests
 COPY scripts/run-api-dev.sh scripts/run-api.sh
 
 RUN chown app:app /app
@@ -57,7 +59,6 @@ FROM base AS prod
 ENV APP_ENV=production
 
 COPY --from=deps-prod /app/.venv /app/.venv
-COPY src alembic alembic.ini pyproject.toml ./
 COPY scripts/run-api-prod.sh scripts/run-api.sh
 
 RUN chown -R app:app /app
