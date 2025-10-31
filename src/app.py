@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.engine = AsyncEngine(
-        base_settings.db_dsn,
+        base_settings,
         pool_size=base_settings.DB_POOL_SIZE,
         max_overflow=0,
         pool_timeout=base_settings.DB_POOL_TIMEOUT,

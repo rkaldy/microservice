@@ -30,7 +30,7 @@ def enable_all_loggers():
 
 @pytest.fixture(scope="session")
 async def db_engine() -> AsyncGenerator[TestAsyncEngine]:
-    async with TestAsyncEngine(base_settings.db_dsn) as engine:
+    async with TestAsyncEngine(base_settings) as engine:
         logging.getLogger("alembic.runtime.migration").setLevel(logging.CRITICAL)
         alembic_config_path = Path(__name__).absolute().parent / "alembic.ini"
         upgrade_coro = asyncio.to_thread(

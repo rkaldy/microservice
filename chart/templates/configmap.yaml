@@ -6,14 +6,19 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 data:
-  APP_ENV: {{ .Values.app.environment | quote }}
-  LOG_LEVEL: {{ .Values.app.logLevel | quote }}
+  APP_ENV: {{ .Values.app.environment }}
+  LOG_LEVEL: {{ .Values.app.logLevel }}
 
   DB_PROTOCOL: {{ .Values.db.protocol | quote }}
   DB_HOST: {{ .Values.db.host | quote }}
-  DB_PORT: {{ .Values.db.port }}
+  DB_PORT: {{ .Values.db.port | quote }}
   DB_NAME: {{ .Values.db.dbName | quote }}
   DB_USER: {{ .Values.db.user | quote }}
-  DB_POOL_SIZE: {{ .Value.db.pool.size }}
-  DB_POOL_TIMEOUT: {{ .Value.db.pool.timeout }}
-  DB_POOL_RECYCLE: {{ .Value.db.pool.recycleAfter }}
+  DB_POOL_SIZE: {{ .Values.db.connectionPool.size | quote }}
+  DB_POOL_TIMEOUT: {{ .Values.db.connectionPool.timeout | quote }}
+  DB_POOL_RECYCLE: {{ .Values.db.connectionPool.recycleAfter | quote }}
+{{- if .Values.db.ssl }}
+  DB_SSL_ENABLED: {{ .Values.db.ssl.enabled | quote }}
+  DB_SSL_VERIFY_CERT: {{ .Values.db.ssl.verifyCertificate | quote }}
+  DB_SSL_CA_PATH: {{ .Values.db.ssl.CAPath | default "" | quote }}
+{{- end }}

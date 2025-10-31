@@ -51,7 +51,7 @@ COPY --from=deps-dev /app/.venv /app/.venv
 COPY tests tests
 COPY scripts/run-api-dev.sh scripts/run-api.sh
 
-RUN chown app:app /app
+RUN chown -R app:app /app
 USER app
 
 

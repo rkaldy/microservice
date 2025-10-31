@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     DB_NAME: str
     DB_USER: str
     DB_PASSWORD: str
+    DB_SSL_ENABLED: bool = False
+    DB_SSL_VERIFY_CERT: bool = False
+    DB_SSL_CA_PATH: str = ""
 
     DB_POOL_SIZE: int
     DB_POOL_TIMEOUT: int

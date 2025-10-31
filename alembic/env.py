@@ -1,11 +1,9 @@
 import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
-from sqlalchemy.ext.asyncio import AsyncEngine
-
 from alembic import context
 from src.db.alembic import sa_metadata
+from src.db.engine import AsyncEngine
 from src.settings.base import base_settings
 
 # this is the Alembic Config object, which provides
@@ -66,15 +64,7 @@ async def run_migrations_online() -> None:
     wrap the migration routine in `run_sync()`, which allows synchronous calls of async driver
     methods.
     """
-    engine = AsyncEngine(
-        engine_from_config(
-            config.get_section(config.config_ini_section, {}),
-            prefix="sqlalchemy.",
-            poolclass=pool.NullPool,
-            url=base_settings.db_dsn,
-        )
-    )
-    async with engine.connect() as connection:
+    async with AsyncEngine(base_settings) as engine, engine.connect() as connection:
         await connection.run_sync(run_migrations_sync)
 
 
