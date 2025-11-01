@@ -1,8 +1,15 @@
 image:
   # Will be added from helm command
   repository: ""
-  pullPolicy: Always
   tag: ""
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 256Mi
+  requests:
+    cpu: 150m
+    memory: 128Mi
 
 app:
   logLevel: "info"
@@ -19,3 +26,12 @@ db:
   ssl:
     enabled: true
     verifyCertificate: false
+
+
+api:
+  replicaCount: 2
+  serverWorkers: 2
+  service:
+    type: LoadBalancer
+  ingress:
+    path: "/"

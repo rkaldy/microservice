@@ -1,6 +1,9 @@
 app:
   environment: dev
 
+image:
+  pullPolicy: Always
+
 db:
   protocol: mysql+aiomysql
   host: 172.24.96.3

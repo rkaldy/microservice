@@ -1,0 +1,34 @@
+{{- if .Values.api.ingress }}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: "zerossl"
+spec:
+  ingressClassName: nginx
+  {{- if .Values.api.ingress.tls }}
+  tls:
+  - hosts:
+      - {{ .Values.api.ingress.host }}
+    secretName: {{ .Values.api.ingress.host }}
+  {{- end }}
+  rules:
+  - http:
+      paths:
+        - pathType: Prefix
+          path: {{ .Values.api.ingress.path }}
+          backend:
+            service:
+              name: {{ .Release.Name }}-api
+              port:
+                number: 80
+  {{- if .Values.api.ingress.host }}
+    host: {{ .Values.api.ingress.host }}
+  {{- end }}
+
+{{- end }}

@@ -1,13 +1,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "chart.prefix" . }}common
+  name: {{ .Release.Name }}-common
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 data:
-  APP_ENV: {{ .Values.app.environment }}
-  LOG_LEVEL: {{ .Values.app.logLevel }}
+  APP_ENV: {{ .Values.app.environment | quote }}
+  LOG_LEVEL: {{ .Values.app.logLevel | quote }}
+  API_SERVER_WORKERS: {{ .Values.api.serverWorkers | quote }}
 
   DB_PROTOCOL: {{ .Values.db.protocol | quote }}
   DB_HOST: {{ .Values.db.host | quote }}

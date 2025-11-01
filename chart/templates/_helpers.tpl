@@ -1,15 +1,4 @@
 {{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
-*/}}
-{{- define "chart.prefix" -}}
-{{- if ne .Release.Name .Chart.Name }}
-{{- .Release.Name | replace .Chart.Name "" | trunc 63 | trimPrefix "-" }}-
-{{- end }}
-{{- end }}
-
-{{/*
 Common labels
 */}}
 {{- define "chart.labels" -}}
@@ -24,14 +13,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "chart.selectorLabels" -}}
-{{ include "chart.labels" . }}
-app.kubernetes.io/name: {{ include "chart.name" . }}
+app.kubernetes.io/name: {{ .Release.Name }}
 app.kubernetes.io/component:
 {{- end }}
 
 {{/*
-Docker image
+Docker image and pod resources
 */}}
-{{- define "chart.image" -}}
-{{- .Values.image.repository }}:{{ .Values.image.tag }}
+{{- define "chart.imageAndResources" -}}
+{{- $image := .ctx.image | default .root.image -}}
+image: "{{ $image.repository }}:{{ $image.tag }}"
+imagePullPolicy: {{ $image.pullPolicy }}
+resources:
+{{- toYaml (.ctx.resources | default .root.resources) | nindent 2 }}
 {{- end }}

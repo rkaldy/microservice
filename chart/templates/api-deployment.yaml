@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+  annotations:
+    checksum/config: {{ include (print .Template.BasePath "/configmap.yaml") . | sha256sum }}
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "chart.selectorLabels" . | nindent 6 }} api
+  template:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }} api
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: api
+          {{- include "chart.imageAndResources" (dict "root" .Values "ctx" .Values.api) | nindent 10 }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-common
+            - secretRef:
+                name: {{ .Release.Name }}-secret
+          command: [ "/app/scripts/run-api.sh" ]
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            periodSeconds: 3
+            timeoutSeconds: 5
+            initialDelaySeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+            httpGet:
+              path: /-/liveness
+              port: 80
+          readinessProbe:
+            periodSeconds: 3
+            timeoutSeconds: 5
+            initialDelaySeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+            httpGet:
+              path: /-/readiness
+              port: 80
