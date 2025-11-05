@@ -32,7 +32,7 @@ ENV VIRTUAL_ENV=/app/.venv \
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends vim curl iputils-ping && \
+    apt-get install -y --no-install-recommends vim curl iputils-ping net-tools && \
     apt-get clean
 RUN useradd --uid 1000 --user-group --no-create-home app
 
