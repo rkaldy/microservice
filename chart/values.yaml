@@ -1,3 +1,6 @@
+cluster:
+  gcpProjectID: microservice-template-475915
+
 image:
   # Will be added from helm command
   repository: ""
@@ -34,4 +37,5 @@ api:
   service:
     type: LoadBalancer
   ingress:
+    host: "insert-your-domain-here"
     path: "/"
