@@ -5,8 +5,10 @@ services:
       target: dev
       network: host
     environment:
+      APP_ENV: local
       LOG_LEVEL: info
       DB_PROTOCOL: postgresql+asyncpg  # or mysql+aiomysql
+      SENTRY_DSN: "https://4af4a5c17aff72f702472e40a4b529dd@o4510357795438592.ingest.de.sentry.io/4510357797470288"
       DB_HOST: postgres  # or mysql
       DB_PORT: 5432  # or 3306
       DB_NAME: db
@@ -15,6 +17,8 @@ services:
       DB_POOL_SIZE: 1
       DB_POOL_TIMEOUT: 10
       DB_POOL_RECYCLE: 1800
+      DB_QUERY_RETRY_COUNT: 3
+      DB_QUERY_RETRY_WAIT_ARGS: '{ "factor": 0.1, "base": 1.5 }'
     ports:
       - "5000:80"
     volumes:

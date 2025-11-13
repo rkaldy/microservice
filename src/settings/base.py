@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     APP_ENV: str
     LOG_LEVEL: str
+    SENTRY_DSN: str | None = None
 
     DB_PROTOCOL: str
     DB_HOST: str
@@ -18,6 +19,9 @@ class Settings(BaseSettings):
     DB_POOL_SIZE: int
     DB_POOL_TIMEOUT: int
     DB_POOL_RECYCLE: int
+
+    DB_QUERY_RETRY_COUNT: int
+    DB_QUERY_RETRY_WAIT_ARGS: dict[str, float]
 
     @property
     def db_dsn(self) -> str:

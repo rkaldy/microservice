@@ -8,6 +8,7 @@ metadata:
 data:
   APP_ENV: {{ .Values.app.environment | quote }}
   LOG_LEVEL: {{ .Values.app.logLevel | quote }}
+  SENTRY_DSN: {{ .Values.app.sentryDSN | quote }}
   API_SERVER_WORKERS: {{ .Values.api.serverWorkers | quote }}
 
   DB_PROTOCOL: {{ .Values.db.protocol | quote }}
@@ -18,6 +19,8 @@ data:
   DB_POOL_SIZE: {{ .Values.db.connectionPool.size | quote }}
   DB_POOL_TIMEOUT: {{ .Values.db.connectionPool.timeout | quote }}
   DB_POOL_RECYCLE: {{ .Values.db.connectionPool.recycleAfter | quote }}
+  DB_QUERY_RETRY_COUNT: {{ .Values.db.retry.count | quote }}
+  DB_QUERY_RETRY_WAIT_ARGS: {{ .Values.db.retry.wait | toJson | squote }}
 {{- if .Values.db.ssl }}
   DB_SSL_ENABLED: {{ .Values.db.ssl.enabled | quote }}
   DB_SSL_VERIFY_CERT: {{ .Values.db.ssl.verifyCertificate | quote }}

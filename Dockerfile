@@ -45,8 +45,6 @@ CMD ["scripts/run-api.sh"]
 
 
 FROM base AS dev
-ENV APP_ENV=development
-
 COPY --from=deps-dev /app/.venv /app/.venv
 COPY tests tests
 COPY scripts/run-api-dev.sh scripts/run-api.sh
@@ -56,8 +54,6 @@ USER app
 
 
 FROM base AS prod
-ENV APP_ENV=production
-
 COPY --from=deps-prod /app/.venv /app/.venv
 COPY scripts/run-api-prod.sh scripts/run-api.sh
 

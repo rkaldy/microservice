@@ -2,15 +2,15 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.exception_handlers import http_exception_handler
-from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.api.router import router
 from src.db.engine import AsyncEngine
 from src.settings.base import base_settings
 from src.utils.log import prepare_logging
+from src.utils.sentry import init_sentry
 
 prepare_logging()
+init_sentry(server_name="api-server", component="api")
 
 logger = logging.getLogger(__name__)
 
@@ -41,10 +41,4 @@ def create_api_app():
     )
 
     app.include_router(router)
-
-    @app.exception_handler(StarletteHTTPException)
-    async def custom_http_exception_handler(request, exc):
-        logger.error("HTTP error: %s", str(exc))
-        return await http_exception_handler(request, exc)
-
     return app
