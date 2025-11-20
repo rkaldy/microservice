@@ -1,6 +1,3 @@
-cluster:
-  gcpProjectID: microservice-template-475915
-
 image:
   # Will be added from helm command
   repository: ""
