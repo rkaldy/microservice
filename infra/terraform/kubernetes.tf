@@ -12,3 +12,10 @@ provider "kubernetes" {
     data.google_container_cluster.cluster.master_auth[0].cluster_ca_certificate
   )
 }
+
+provider "helm" {
+  kubernetes {
+    config_path    = "~/.kube/config"
+    config_context = var.kubernetes_context
+  }
+}

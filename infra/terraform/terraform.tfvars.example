@@ -1,5 +1,12 @@
 project_id =
 cluster_name =
 cluster_location =
+kubernetes_context =
 
 namespaces = []
+
+grafana_prometheus_url =
+grafana_prometheus_username =
+grafana_loki_url =
+grafana_loki_username =
+# Add grafana password to infra-grafana-password in Google Secret Manager
