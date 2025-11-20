@@ -2,12 +2,12 @@
 help: # Show help for each of the Makefile recipes
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m: $$(echo $$l | cut -f 2- -d'#')\n"; done
 
-PROJECT_NAME := $(shell echo "$${COMPOSE_PROJECT_NAME:-$$(basename $$(pwd))}")
+PROJECT_NAME := $(shell grep "name:" chart/Chart.yaml | head -n 1 | cut -d " " -f 2)
 # rename to your cloud docker registry
 DOCKER_REGISTRY := europe-central2-docker.pkg.dev/microservice-template-475915/docker
-IMAGE = $(DOCKER_REGISTRY)/$(PROJECT_NAME)-api
+IMAGE = $(DOCKER_REGISTRY)/$(PROJECT_NAME)
 TAG = $(shell git rev-parse --short=8 HEAD)
-BUILD_TARGET ?= prod
+BUILD_TARGET ?= dev
 CONTAINER_ID ?= $(PROJECT_NAME)-api-1
 TA ?= -v --ignore=tests/e2e/ tests/
 
@@ -42,6 +42,34 @@ migration: # Create alembic migration script from the current state, set MSG for
 	docker exec -it $(CONTAINER_ID) alembic revision --autogenerate -m "$(MSG)"
 	docker exec -it $(CONTAINER_ID) alembic upgrade head
 
-push: # Build image and push it to the registry. You can specify the build target (default: prod)
+push: # Build image and push it to the registry. You can specify the build target (default: dev)
 	docker build -t $(IMAGE):$(TAG) --target $(BUILD_TARGET) .
 	docker push $(IMAGE):$(TAG)
+
+TPL_FLAG := $(if $(strip $(TPL)),--show-only templates/$(TPL),)
+helm-template: # Render helm templates for BUILD_TARGET (default: dev). If TPL is set, it renders only only template.
+	@helm template -n $(PROJECT_NAME)-$(BUILD_TARGET) \
+		--set image.repository="$(IMAGE)" \
+		--set image.tag="$(TAG)" \
+		--values chart/values.yaml \
+		--values chart/values.$(BUILD_TARGET).yaml \
+		$(TPL_FLAG) $(PROJECT_NAME) chart/
+
+install: # Install the application to the dev cluster. The current revision should be pushed to docker registry first. Intentionally allows only development deploy to prevent accidentally rewriting production cluster.
+	helm install -n $(PROJECT_NAME)-dev \
+		--set image.repository="$(IMAGE)" \
+		--set image.tag="$(TAG)" \
+		--values chart/values.yaml \
+		--values chart/values.dev.yaml \
+		$(PROJECT_NAME) chart/
+
+upgrade: # Upgrade the application in the dev cluster. The current revision should be pushed to docker registry first. Intentionally allows only development deploy to prevent accidentally rewriting production cluster.
+	helm upgrade -n $(PROJECT_NAME)-dev \
+		--set image.repository="$(IMAGE)" \
+		--set image.tag="$(TAG)" \
+		--values chart/values.yaml \
+		--values chart/values.dev.yaml \
+		$(PROJECT_NAME) chart/
+
+uninstall: # Uninstall the application from the dev cluster. Intentionally allows only development deploy to prevent accidentally production cluster deletion.
+	helm uninstall -n $(PROJECT_NAME)-dev $PROJECT_NAME
