@@ -72,4 +72,4 @@ upgrade: # Upgrade the application in the dev cluster. The current revision shou
 		$(PROJECT_NAME) chart/
 
 uninstall: # Uninstall the application from the dev cluster. Intentionally allows only development deploy to prevent accidentally production cluster deletion.
-	helm uninstall -n $(PROJECT_NAME)-dev $PROJECT_NAME
+	helm uninstall -n $(PROJECT_NAME)-dev $(PROJECT_NAME)
