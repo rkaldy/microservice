@@ -4,13 +4,20 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "chart.prefix" . }}api
-  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "chart.labels" . | nindent 4 }}
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+{{- if .Values.api.ingress.tlsEnabled }}
+    cert-manager.io/cluster-issuer: "letsencrypt"
+{{- end }}
 spec:
   ingressClassName: nginx
+{{- if .Values.api.ingress.tlsEnabled }}
+  tls:
+    - hosts:
+        - {{ .Values.api.ingress.host }}
+      secretName: {{ include "chart.prefix" . }}api-tls
+{{- end }}
   rules:
   - http:
       paths:

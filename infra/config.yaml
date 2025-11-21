@@ -2,6 +2,7 @@ projectId: microservice-template-475915
 clusterName: cluster
 clusterLocation: europe-central2
 kubernetesContext: microservice
+adminEmail: robert@antonio.cz
 
 namespaces:
   - microservice-dev
