@@ -9,7 +9,7 @@ resource "helm_release" "grafana-k8s-monitoring" {
   name             = "grafana-k8s-monitoring"
   repository       = "https://grafana.github.io/helm-charts"
   chart            = "k8s-monitoring"
-  namespace        = "logging"
+  namespace        = "monitoring"
   create_namespace = true
   atomic           = true
   timeout          = 300
