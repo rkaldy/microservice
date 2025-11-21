@@ -7,12 +7,12 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
   annotations:
-{{- if .Values.api.ingress.tlsEnabled }}
-    cert-manager.io/cluster-issuer: "letsencrypt"
+{{- if .Values.api.ingress.tls.enabled }}
+    cert-manager.io/cluster-issuer: {{ .Values.api.ingress.tls.certificateIssuer }}
 {{- end }}
 spec:
   ingressClassName: nginx
-{{- if .Values.api.ingress.tlsEnabled }}
+{{- if .Values.api.ingress.tls.enabled }}
   tls:
     - hosts:
         - {{ .Values.api.ingress.host }}
