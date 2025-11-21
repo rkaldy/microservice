@@ -1,7 +1,7 @@
 provider "google" {
-  project = local.cfg.project_id
+  project = local.cfg.projectId
 }
 
 data "google_project" "project" {
-  project_id = local.cfg.project_id
+  project_id = local.cfg.projectId
 }

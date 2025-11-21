@@ -10,7 +10,7 @@ resource "helm_release" "external_secrets" {
 resource "google_service_account" "secrets" {
   for_each = toset(local.cfg.namespaces)
 
-  project      = local.cfg.project_id
+  project      = local.cfg.projectId
   account_id   = "${each.key}-secrets"
   display_name = "GSA for ${each.key} External Secrets"
 }
@@ -32,13 +32,13 @@ resource "google_service_account_iam_member" "secrets_workload_identity" {
 
   service_account_id = google_service_account.secrets[each.key].name
   role   = "roles/iam.workloadIdentityUser"
-  member = "serviceAccount:${local.cfg.project_id}.svc.id.goog[${each.key}/external-secrets]"
+  member = "serviceAccount:${local.cfg.projectId}.svc.id.goog[${each.key}/external-secrets]"
 }
 
 resource "google_project_iam_member" "secrets" {
   for_each = toset(local.cfg.namespaces)
 
-  project  = local.cfg.project_id
+  project  = local.cfg.projectId
   role     = "roles/secretmanager.secretAccessor"
   member   = "serviceAccount:${google_service_account.secrets[each.key].email}"
   condition {
