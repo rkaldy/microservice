@@ -1,0 +1,15 @@
+projectId:
+clusterName:
+clusterLocation:
+kubernetesContext:
+adminEmail:
+
+namespaces:
+  - microservice-dev
+  - microservice-prod
+
+grafana:
+  prometheusUrl:
+  prometheusUsername:
+  lokiUrl:
+  lokiUsername:

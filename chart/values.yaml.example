@@ -13,7 +13,7 @@ resources:
 
 app:
   logLevel: "info"
-  sentryDSN: "https://4af4a5c17aff72f702472e40a4b529dd@o4510357795438592.ingest.de.sentry.io/4510357797470288"
+  sentryDSN:
 
 db:
   protocol: postgresql+asyncpg
@@ -38,6 +38,6 @@ api:
   serverWorkers: 2
   service: {}
   ingress:
-    host: "micro.antonio.cz"
+    host:
     path: "/"
     tlsEnabled: true
