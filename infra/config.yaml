@@ -1,0 +1,14 @@
+project_id: microservice-template-475915
+cluster_name: cluster
+cluster_location: europe-central2
+kubernetes_context: microservice
+
+namespaces:
+  - microservice-dev
+  - microservice-prod
+
+grafana:
+  prometheus_url: "https://prometheus-prod-65-prod-eu-west-2.grafana.net/api/prom/push"
+  prometheus_username: "2809059"
+  loki_url: "https://logs-prod-012.grafana.net/loki/api/v1/push"
+  loki_username: "1400207"

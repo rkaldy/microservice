@@ -1,13 +1,22 @@
-resource "google_service_account" "secrets" {
-  for_each = toset(var.namespaces)
+resource "helm_release" "external_secrets" {
+  name             = "external-secrets"
+  repository       = "https://charts.external-secrets.io"
+  chart            = "external-secrets"
+  namespace        = "external-secrets"
+  create_namespace = true
+  atomic           = true
+}
 
-  project      = var.project_id
+resource "google_service_account" "secrets" {
+  for_each = toset(local.cfg.namespaces)
+
+  project      = local.cfg.project_id
   account_id   = "${each.key}-secrets"
   display_name = "GSA for ${each.key} External Secrets"
 }
 
 resource "kubernetes_service_account" "secrets" {
-  for_each = toset(var.namespaces)
+  for_each = toset(local.cfg.namespaces)
 
   metadata {
     name      = "external-secrets"
@@ -19,17 +28,17 @@ resource "kubernetes_service_account" "secrets" {
 }
 
 resource "google_service_account_iam_member" "secrets_workload_identity" {
-  for_each = toset(var.namespaces)
+  for_each = toset(local.cfg.namespaces)
 
   service_account_id = google_service_account.secrets[each.key].name
   role   = "roles/iam.workloadIdentityUser"
-  member = "serviceAccount:${var.project_id}.svc.id.goog[${each.key}/external-secrets]"
+  member = "serviceAccount:${local.cfg.project_id}.svc.id.goog[${each.key}/external-secrets]"
 }
 
 resource "google_project_iam_member" "secrets" {
-  for_each = toset(var.namespaces)
+  for_each = toset(local.cfg.namespaces)
 
-  project  = var.project_id
+  project  = local.cfg.project_id
   role     = "roles/secretmanager.secretAccessor"
   member   = "serviceAccount:${google_service_account.secrets[each.key].email}"
   condition {
@@ -37,36 +46,4 @@ resource "google_project_iam_member" "secrets" {
     description = "Access only to secrets with prefix ${each.key}-"
     expression  = "resource.name.startsWith(\"projects/${data.google_project.project.number}/secrets/${each.key}-\")"
   }
-}
-
-resource "kubernetes_manifest" "secret_store" {
-  for_each = toset(var.namespaces)
-
-  manifest = {
-    apiVersion = "external-secrets.io/v1"
-    kind       = "SecretStore"
-    metadata = {
-      name      = "external-secrets"
-      namespace = each.key
-    }
-    spec = {
-      provider = {
-        gcpsm = {
-          projectID = var.project_id
-          auth = {
-            workloadIdentity = {
-              serviceAccountRef = {
-                name      = "external-secrets"
-                namespace = each.key
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  depends_on = [
-    kubernetes_service_account.secrets
-  ]
 }

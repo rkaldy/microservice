@@ -1,8 +1,8 @@
 data "google_client_config" "default" {}
 
 data "google_container_cluster" "cluster" {
-  name     = var.cluster_name
-  location = var.cluster_location
+  name     = local.cfg.cluster_name
+  location = local.cfg.cluster_location
 }
 
 provider "kubernetes" {
@@ -16,6 +16,6 @@ provider "kubernetes" {
 provider "helm" {
   kubernetes {
     config_path    = "~/.kube/config"
-    config_context = var.kubernetes_context
+    config_context = local.cfg.kubernetes_context
   }
 }

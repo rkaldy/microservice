@@ -1,5 +1,5 @@
 data "google_secret_manager_secret_version" "grafana" {
-  project = var.project_id
+  project = local.cfg.project_id
   secret  = "infra-grafana-password"
   version = "latest"
 }
@@ -18,17 +18,17 @@ resource "helm_release" "grafana-k8s-monitoring" {
 
   set {
     name  = "cluster.name"
-    value = var.cluster_name
+    value = local.cfg.cluster_name
   }
 
   set {
     name  = "destinations[0].url"
-    value = var.grafana_prometheus_url
+    value = local.cfg.grafana.prometheus_url
   }
 
   set_sensitive {
     name  = "destinations[0].auth.username"
-    value = var.grafana_prometheus_username
+    value = local.cfg.grafana.prometheus_username
   }
 
   set_sensitive {
@@ -38,12 +38,12 @@ resource "helm_release" "grafana-k8s-monitoring" {
 
   set {
     name  = "destinations[1].url"
-    value = var.grafana_loki_url
+    value = local.cfg.grafana.loki_url
   }
 
   set_sensitive {
     name  = "destinations[1].auth.username"
-    value = var.grafana_loki_username
+    value = local.cfg.grafana.loki_username
   }
 
   set_sensitive {
@@ -63,11 +63,11 @@ resource "helm_release" "grafana-k8s-monitoring" {
 
   set {
     name  = "alloy-metrics.alloy.extraEnv[0].value"
-    value = var.cluster_name
+    value = local.cfg.cluster_name
   }
 
   set {
     name  = "alloy-logs.alloy.extraEnv[0].value"
-    value = var.cluster_name
+    value = local.cfg.cluster_name
   }
 }
