@@ -38,6 +38,7 @@ RUN useradd --uid 1000 --user-group --no-create-home app
 
 COPY src src
 COPY alembic alembic
+COPY scripts scripts
 COPY alembic.ini pyproject.toml ./
 
 EXPOSE 80
@@ -47,7 +48,6 @@ CMD ["scripts/run-api.sh"]
 FROM base AS dev
 COPY --from=deps-dev /app/.venv /app/.venv
 COPY tests tests
-COPY scripts/run-api-dev.sh scripts/run-api.sh
 
 RUN chown -R app:app /app
 USER app
@@ -55,7 +55,6 @@ USER app
 
 FROM base AS prod
 COPY --from=deps-prod /app/.venv /app/.venv
-COPY scripts/run-api-prod.sh scripts/run-api.sh
 
 RUN chown -R app:app /app
 USER app
