@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     APP_ENV: str
     LOG_LEVEL: str
     SENTRY_DSN: str | None = None
+    BEARER_TOKEN: str | None = None
 
     DB_PROTOCOL: str
     DB_HOST: str

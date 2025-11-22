@@ -3,7 +3,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from src.api.router import router
+from src.api.probe import router as probe_router
+from src.api.v1.router import router as api_router
 from src.db.engine import AsyncEngine
 from src.settings.base import base_settings
 from src.utils.log import prepare_logging
@@ -40,5 +41,6 @@ def create_api_app():
         lifespan=lifespan,
     )
 
-    app.include_router(router)
+    app.include_router(probe_router)
+    app.include_router(api_router)
     return app

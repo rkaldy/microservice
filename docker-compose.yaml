@@ -7,8 +7,8 @@ services:
     environment:
       APP_ENV: local
       LOG_LEVEL: info
+      BEARER_TOKEN: bear
       DB_PROTOCOL: postgresql+asyncpg  # or mysql+aiomysql
-      SENTRY_DSN: "https://4af4a5c17aff72f702472e40a4b529dd@o4510357795438592.ingest.de.sentry.io/4510357797470288"
       DB_HOST: postgres  # or mysql
       DB_PORT: 5432  # or 3306
       DB_NAME: db
