@@ -35,17 +35,6 @@ kubectl create namespace <your-k8s-namespace>
 kubectl config set-context --current --namespace=<your-k8s-namespace>
 ```
 
-### Helm preparation
-Set Google Secret Manager as external secret provider and add appropriate permissions:
-```bash
-helm repo add external-secrets https://charts.external-secrets.io
-helm repo update
-helm install external-secrets external-secrets/external-secrets -n external-secrets --create-namespace
-kubectl annotate serviceaccount -n external-secrets external-secrets iam.gke.io/gcp-service-account=external-secrets@<your-project-id>.iam.gserviceaccount.com
-gcloud projects add-iam-policy-binding <your-project-id> --member serviceaccount:external-secrets@<your-project-id>.iam.gserviceaccount.com --role roles/secretmanager.secretAccessor
-gcloud iam service-accounts add-iam-policy-binding external-secrets@<your-project-id>.iam.gserviceaccount.com --role="roles/iam.workloadIdentityUser" --member:serviceAccount:<your-project-id>.svc.id.goog[external-secrets/external-secrets]
-```
-
 ## Customizing the template
 Use this template as a skeleton for you new project. You need to rewrite following things:
 
