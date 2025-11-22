@@ -55,21 +55,15 @@ helm-template: # Render helm templates for BUILD_TARGET (default: dev). If TPL i
 		--values chart/values.$(BUILD_TARGET).yaml \
 		$(TPL_FLAG) $(PROJECT_NAME) chart/
 
-install: # Install the application to the dev cluster. The current revision should be pushed to docker registry first. Intentionally allows only development deploy to prevent accidentally rewriting production cluster.
-	helm install -n $(PROJECT_NAME)-dev \
+install: # Deploy the application to the dev cluster. The current revision must be pushed to docker registry first. Intentionally allows only development deploy to prevent accidentally rewriting production cluster.
+	helm upgrade --install \
+	    --namespace $(PROJECT_NAME)-dev \
 		--set image.repository="$(IMAGE)" \
 		--set image.tag="$(TAG)" \
 		--values chart/values.yaml \
 		--values chart/values.dev.yaml \
 		$(PROJECT_NAME) chart/
 
-upgrade: # Upgrade the application in the dev cluster. The current revision should be pushed to docker registry first. Intentionally allows only development deploy to prevent accidentally rewriting production cluster.
-	helm upgrade -n $(PROJECT_NAME)-dev \
-		--set image.repository="$(IMAGE)" \
-		--set image.tag="$(TAG)" \
-		--values chart/values.yaml \
-		--values chart/values.dev.yaml \
-		$(PROJECT_NAME) chart/
 
 uninstall: # Uninstall the application from the dev cluster. Intentionally allows only development deploy to prevent accidentally production cluster deletion.
-	helm uninstall -n $(PROJECT_NAME)-dev $(PROJECT_NAME)
+	helm uninstall --namespace $(PROJECT_NAME)-dev $(PROJECT_NAME)

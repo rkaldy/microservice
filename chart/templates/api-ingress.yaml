@@ -9,6 +9,7 @@ metadata:
   annotations:
 {{- if .Values.api.ingress.tls.enabled }}
     cert-manager.io/cluster-issuer: {{ .Values.api.ingress.tls.certificateIssuer }}
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 {{- end }}
 spec:
   ingressClassName: nginx
