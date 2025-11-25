@@ -13,13 +13,6 @@ provider "kubernetes" {
   )
 }
 
-resource "kubernetes_namespace" "namespaces" {
-  for_each = toset(var.k8s_namespaces)
-  metadata {
-    name = each.key
-  }
-}
-
 provider "helm" {
   kubernetes = {
     host                   = "https://${data.google_container_cluster.cluster.endpoint}"

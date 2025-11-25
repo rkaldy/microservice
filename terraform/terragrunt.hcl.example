@@ -1,0 +1,12 @@
+inputs = {
+  project_id =
+  cluster_name =
+  cluster_location =
+  admin_email =
+  k8s_namespace =
+
+  grafana_prometheus_url =
+  grafana_prometheus_username =
+  grafana_loki_url =
+  grafana_loki_username =
+}

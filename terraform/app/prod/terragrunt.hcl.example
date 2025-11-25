@@ -1,0 +1,11 @@
+include {
+  path = find_in_parent_folders()
+}
+
+terraform {
+  source = "../common//."
+}
+
+inputs = {
+  env = basename(get_terragrunt_dir())
+}
