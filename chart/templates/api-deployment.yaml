@@ -24,6 +24,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "chart.prefix" . }}common
+            - configMapRef:
+                name: {{ include "chart.prefix" . }}database
             - secretRef:
                 name: {{ include "chart.prefix" . }}secret
           command: [ "/app/scripts/run-api.sh" ]

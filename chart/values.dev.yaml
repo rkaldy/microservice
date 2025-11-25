@@ -3,8 +3,3 @@ app:
 
 image:
   pullPolicy: Always
-
-db:
-  protocol: mysql+aiomysql
-  host: 172.24.96.3
-  port: 3306

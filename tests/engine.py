@@ -32,14 +32,14 @@ class TestAsyncEngine(AsyncEngine):
             await conn.rollback()
 
     async def drop_db_tables(self):
-        if "postgres" in base_settings.DB_PROTOCOL:
+        if base_settings.DB_TYPE == "postgres":
             tables_stmt = sa.text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
             async with self.begin() as conn:
                 tables = await conn.execute(tables_stmt)
                 for row in tables.fetchall():
                     drop_stmt = sa.text(f"DROP TABLE IF EXISTS {row[0]} CASCADE")
                     await conn.execute(drop_stmt)
-        elif "mysql" in base_settings.DB_PROTOCOL:
+        elif base_settings.DB_TYPE == "mysql":
             tables_stmt = sa.text(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = :db"
             )
@@ -50,4 +50,4 @@ class TestAsyncEngine(AsyncEngine):
                     drop_stmt = sa.text(f"DROP TABLE IF EXISTS {row[0]}")
                     await conn.execute(drop_stmt)
         else:
-            raise RuntimeError("Unknown database protocol", base_settings.DB_PROTOCOL)
+            raise RuntimeError("Unknown database type", base_settings.DB_TYPE)

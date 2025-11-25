@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings
 
+DB_PROTOCOL_MAPPING: dict[str, str] = {"mysql": "mysql+aiomysql", "postgres": "postgresql+asyncpg"}
+
 
 class Settings(BaseSettings):
     APP_ENV: str
@@ -7,9 +9,8 @@ class Settings(BaseSettings):
     SENTRY_DSN: str | None = None
     BEARER_TOKEN: str | None = None
 
-    DB_PROTOCOL: str
+    DB_TYPE: str
     DB_HOST: str
-    DB_PORT: int
     DB_NAME: str
     DB_USER: str
     DB_PASSWORD: str
@@ -26,11 +27,11 @@ class Settings(BaseSettings):
 
     @property
     def db_dsn(self) -> str:
-        return f"{self.DB_PROTOCOL}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"{DB_PROTOCOL_MAPPING[self.DB_TYPE]}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}"
 
     @property
     def db_safe_dsn(self) -> str:
-        return f"{self.DB_PROTOCOL}://{self.DB_USER}:******@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"{DB_PROTOCOL_MAPPING[self.DB_TYPE]}://{self.DB_USER}:******@{self.DB_HOST}/{self.DB_NAME}"
 
 
 base_settings = Settings()

@@ -4,9 +4,6 @@ app:
 image:
   pullPolicy: IfNotPresent
 
-db:
-  host: 172.24.96.5
-
 api:
   replicaCount: 3
   resources:

@@ -17,3 +17,21 @@ variable "k8s_namespace" {
 variable "env" {
   type = string
 }
+
+variable "database" {
+  type = object({
+    type_version        = string
+    edition             = string
+    cpu                 = number
+    memory              = number
+    disk_size           = number
+    disk_autoresize     = bool
+    deletion_protection = bool
+    availability_type   = string
+    backup_enabled      = bool
+    backup_time         = string
+    maintenance_day     = number
+    maintenance_hour    = number
+    flags               = map(string)
+  })
+}

@@ -14,11 +14,6 @@ data:
   SENTRY_DSN: {{ .Values.app.sentryDSN | quote }}
   API_SERVER_WORKERS: {{ .Values.api.serverWorkers | quote }}
 
-  DB_PROTOCOL: {{ .Values.db.protocol | quote }}
-  DB_HOST: {{ .Values.db.host | quote }}
-  DB_PORT: {{ .Values.db.port | quote }}
-  DB_NAME: {{ .Values.db.dbName | quote }}
-  DB_USER: {{ .Values.db.user | quote }}
   DB_POOL_SIZE: {{ .Values.db.connectionPool.size | quote }}
   DB_POOL_TIMEOUT: {{ .Values.db.connectionPool.timeout | quote }}
   DB_POOL_RECYCLE: {{ .Values.db.connectionPool.recycleAfter | quote }}
