@@ -21,18 +21,11 @@ gcloud auth login
 Set the default project configuration
 ```bash
 gcloud config set project <your-project-id>`
-gcloud config set compute/region <your-preferred-region>
-gcloud config set compute/zone <your-preferred-zone>
 ```
 Set kubernetes context
 ```bash
 gcloud services enable container.googleapis.com
 gcloud container clusters get-credentials <your-cluster-name>
-```
-Set namespace
-```
-kubectl create namespace <your-k8s-namespace>
-kubectl config set-context --current --namespace=<your-k8s-namespace>
 ```
 
 ## Customizing the template

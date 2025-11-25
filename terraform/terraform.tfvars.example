@@ -1,2 +1,12 @@
 project_id =
-k8s_namespace =
+cluster_name =
+cluster_location =
+admin_email =
+
+namespaces = [
+]
+
+grafana_prometheus_url =
+grafana_prometheus_username =
+grafana_loki_url =
+grafana_loki_username =
