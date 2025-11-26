@@ -13,9 +13,10 @@ resource "google_sql_database_instance" "db" {
 
     dynamic "database_flags" {
       for_each = var.database.flags
+      iterator = flag
       content {
-        name  = var.database.flags.key
-        value = var.database.flags.value
+        name  = flag.key
+        value = flag.value
       }
     }
 
@@ -34,6 +35,11 @@ resource "google_sql_database_instance" "db" {
       query_string_length     = 1024
       record_application_tags = false
       record_client_address   = false
+    }
+
+    ip_configuration {
+      ipv4_enabled = false
+      private_network = data.google_compute_network.default.self_link
     }
   }
 }

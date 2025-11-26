@@ -16,10 +16,6 @@ app:
   sentryDSN:
 
 db:
-  protocol: postgresql+asyncpg
-  port: 5432
-  user: user
-  dbName: db
   connectionPool:
     size: 1
     timeout: 10

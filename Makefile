@@ -64,6 +64,5 @@ install: # Deploy the application to the dev cluster. The current revision must 
 		--values chart/values.dev.yaml \
 		$(PROJECT_NAME) chart/
 
-
 uninstall: # Uninstall the application from the dev cluster. Intentionally allows only development deploy to prevent accidentally production cluster deletion.
 	helm uninstall --namespace $(PROJECT_NAME)-dev $(PROJECT_NAME)
