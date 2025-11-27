@@ -8,8 +8,12 @@ destinations:
     auth:
       type: basic
 prometheusOperatorObjects:
-  enabled: true
+  enabled: false
 podLogs:
+  enabled: true
+  exclude:
+    - namespaces: ["kube-system", "gke-gmp-system", "gke-managed-cim", "external-secrets", "monitoring", "gitlab-runner"]
+annotationAutodiscovery:
   enabled: true
 alloy-metrics:
   enabled: true

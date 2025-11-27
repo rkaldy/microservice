@@ -16,6 +16,7 @@ services:
       DB_POOL_SIZE: 1
       DB_POOL_TIMEOUT: 10
       DB_POOL_RECYCLE: 1800
+      DB_QUERY_RETRYABLE_EXCEPTIONS: '["DeadlockDetectedError", "SerializationError"]'
       DB_QUERY_RETRY_COUNT: 3
       DB_QUERY_RETRY_WAIT_ARGS: '{ "factor": 0.1, "base": 1.5 }'
     command: scripts/run-api-local.sh

@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 
 import pytest
 import sqlalchemy as sa
-from asyncpg import DeadlockDetectedError
+from asyncpg import DeadlockDetectedError, PostgresSyntaxError
 from pytest_mock import MockerFixture
 from sqlalchemy.exc import DBAPIError
 
@@ -43,9 +43,7 @@ async def test_stream(db_conn: AsyncConnection, table: str):
 @pytest.mark.anyio
 async def test_retryable_query_error(mocker: MockerFixture, caplog):
     conn_mock = mocker.Mock()
-    conn_mock.execute = mocker.AsyncMock(
-        side_effect=DBAPIError("", {}, DeadlockDetectedError(""), False)
-    )
+    conn_mock.execute = mocker.AsyncMock(side_effect=DBAPIError("", {}, DeadlockDetectedError("")))
     conn = AsyncConnection(conn_mock)
 
     with pytest.raises(RetryableQueryError) as ex:
@@ -55,3 +53,16 @@ async def test_retryable_query_error(mocker: MockerFixture, caplog):
     assert "Backing off execute(...)" in caplog.messages[-3]
     assert "Backing off execute(...)" in caplog.messages[-2]
     assert "Giving up execute(...)" in caplog.messages[-1]
+
+
+@pytest.mark.anyio
+async def test_non_retryable_query_error(mocker: MockerFixture, caplog):
+    conn_mock = mocker.Mock()
+    conn_mock.execute = mocker.AsyncMock(side_effect=DBAPIError("", {}, PostgresSyntaxError("")))
+    conn = AsyncConnection(conn_mock)
+
+    with pytest.raises(DBAPIError) as ex:
+        await conn.execute(sa.text(""))
+
+    assert isinstance(ex.value.orig, PostgresSyntaxError)
+    assert not caplog.messages

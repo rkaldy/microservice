@@ -3,19 +3,18 @@ from typing import Any, AsyncIterator, Mapping, Optional, Sequence
 
 import backoff
 import sqlalchemy.ext.asyncio
-from asyncpg import DeadlockDetectedError, SerializationError
 from sqlalchemy import CursorResult, Executable
 from sqlalchemy.engine.interfaces import CoreExecuteOptionsParameter
 from sqlalchemy.exc import DBAPIError
 
+from src.metrics import retryable_query_error_counter
 from src.settings.base import base_settings
 from src.utils.exceptions import RetryableQueryError
 
-RETRYABLE_EXCEPTIONS = (DeadlockDetectedError, SerializationError)
 
-
-def handle_retryable_query_error(_details):
-    pass
+def handle_retryable_query_error(details):
+    exc: RetryableQueryError = details["exception"]
+    retryable_query_error_counter.labels(error=exc.__cause__.__class__.__name__)
 
 
 class AsyncConnection:
@@ -56,8 +55,9 @@ class AsyncConnection:
                 statement, parameters, execution_options=execution_options
             )
         except DBAPIError as err:
-            if isinstance(err.orig, RETRYABLE_EXCEPTIONS):
-                raise RetryableQueryError(statement) from err
+            err_type = err.orig.__class__.__name__
+            if err_type in base_settings.DB_QUERY_RETRYABLE_EXCEPTIONS:
+                raise RetryableQueryError(statement) from err.orig
             else:
                 raise
 

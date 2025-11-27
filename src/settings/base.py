@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str
     SENTRY_DSN: str | None = None
     BEARER_TOKEN: str | None = None
+    API_SERVER_WORKERS: int
 
     DB_TYPE: str
     DB_HOST: str
@@ -22,6 +23,7 @@ class Settings(BaseSettings):
     DB_POOL_TIMEOUT: int
     DB_POOL_RECYCLE: int
 
+    DB_QUERY_RETRYABLE_EXCEPTIONS: set[str]
     DB_QUERY_RETRY_COUNT: int
     DB_QUERY_RETRY_WAIT_ARGS: dict[str, float]
 

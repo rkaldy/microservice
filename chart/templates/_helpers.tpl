@@ -18,6 +18,14 @@ app.kubernetes.io/component:
 {{- end }}
 
 {{/*
+Default pod annotations
+*/}}
+{{- define "chart.podAnnotations" -}}
+k8s.grafana.com/scrape: "true"
+k8s.grafana.com/metrics.path: "/-/metrics"
+{{- end }}
+
+{{/*
 Docker image and pod resources
 */}}
 {{- define "chart.imageAndResources" -}}

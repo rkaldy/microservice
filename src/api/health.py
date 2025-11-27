@@ -44,7 +44,7 @@ async def readiness(
     )
 
 
-@router.get("/")
+@router.get("/", include_in_schema=False)
 async def root(db_conn: AsyncConnection = Depends(get_db_conn)) -> HealthcheckStatus:
     """
     GKE Gateway API makes regular health checks to "/" endpoint and this endpoint can't be

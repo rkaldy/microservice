@@ -35,6 +35,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends vim curl iputils-ping net-tools && \
     apt-get clean
 RUN useradd --uid 1000 --user-group --no-create-home app
+RUN mkdir /tmp/prometheus && \
+    chown app:app /tmp/prometheus
 
 COPY src src
 COPY alembic alembic

@@ -4,8 +4,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from src.api.health import router as probe_router
+from src.api.metrics import router as metrics_router
 from src.api.v1.router import router as api_router
 from src.db.engine import AsyncEngine
+from src.prometheus_middleware import PrometheusMetricsMiddleware
 from src.settings.base import base_settings
 from src.utils.log import prepare_logging
 from src.utils.sentry import init_sentry
@@ -41,6 +43,8 @@ def create_api_app():
         lifespan=lifespan,
     )
 
+    app.add_middleware(PrometheusMetricsMiddleware)
     app.include_router(probe_router)
+    app.include_router(metrics_router)
     app.include_router(api_router)
     return app

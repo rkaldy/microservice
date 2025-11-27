@@ -22,6 +22,7 @@ db:
     timeout: 10
     recycleAfter: 1000
   retry:
+    retryableExceptions: ["DeadlockDetectedError", "SerializationError"]
     count: 3
     wait:
       factor: 1

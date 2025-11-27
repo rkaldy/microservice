@@ -13,9 +13,11 @@ data:
   LOG_LEVEL: {{ .Values.app.logLevel | quote }}
   SENTRY_DSN: {{ .Values.app.sentryDSN | quote }}
   API_SERVER_WORKERS: {{ .Values.api.serverWorkers | quote }}
+  PROMETHEUS_MULTIPROC_DIR: "/tmp/prometheus"
 
   DB_POOL_SIZE: {{ .Values.db.connectionPool.size | quote }}
   DB_POOL_TIMEOUT: {{ .Values.db.connectionPool.timeout | quote }}
   DB_POOL_RECYCLE: {{ .Values.db.connectionPool.recycleAfter | quote }}
+  DB_QUERY_RETRYABLE_EXCEPTIONS: {{ .Values.db.retry.retryableExceptions | toJson | squote }}
   DB_QUERY_RETRY_COUNT: {{ .Values.db.retry.count | quote }}
   DB_QUERY_RETRY_WAIT_ARGS: {{ .Values.db.retry.wait | toJson | squote }}

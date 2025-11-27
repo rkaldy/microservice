@@ -29,14 +29,6 @@ resource "helm_release" "grafana-k8s-monitoring" {
       value = var.grafana_loki_url
     },
     {
-      name  = "alloy-metrics.remoteConfig.enabled"
-      value = "false"
-    },
-    {
-      name  = "alloy-logs.remoteConfig.enabled"
-      value = "false"
-    },
-    {
       name  = "alloy-metrics.alloy.extraEnv[0].value"
       value = var.cluster_name
     },
