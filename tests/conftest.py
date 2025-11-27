@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from pathlib import Path
 from typing import AsyncGenerator
 
@@ -20,18 +19,9 @@ def anyio_backend():
     return "asyncio"
 
 
-@pytest.fixture(scope="session", autouse=True)
-def enable_all_loggers():
-    for name in logging.root.manager.loggerDict:
-        if name.startswith("src"):
-            logger = logging.getLogger(name)
-            logger.disabled = False
-
-
 @pytest.fixture(scope="session")
 async def db_engine() -> AsyncGenerator[TestAsyncEngine]:
     async with TestAsyncEngine(base_settings) as engine:
-        logging.getLogger("alembic.runtime.migration").setLevel(logging.CRITICAL)
         alembic_config_path = Path(__name__).absolute().parent / "alembic.ini"
         upgrade_coro = asyncio.to_thread(
             alembic_command.upgrade, AlembicConfig(str(alembic_config_path)), "head"

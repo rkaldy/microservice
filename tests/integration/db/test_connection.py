@@ -3,8 +3,12 @@ from typing import AsyncGenerator
 
 import pytest
 import sqlalchemy as sa
+from asyncpg import DeadlockDetectedError
+from pytest_mock import MockerFixture
+from sqlalchemy.exc import DBAPIError
 
 from src.db.connection import AsyncConnection
+from src.utils.exceptions import RetryableQueryError
 
 
 @pytest.fixture
@@ -34,3 +38,20 @@ async def test_stream(db_conn: AsyncConnection, table: str):
     stream_stmt = sa.text(f"SELECT * FROM {table} ORDER BY id DESC")
     ids = [row[0] async for row in db_conn.stream(stream_stmt)]
     assert ids == [3, 2, 1]
+
+
+@pytest.mark.anyio
+async def test_retryable_query_error(mocker: MockerFixture, caplog):
+    conn_mock = mocker.Mock()
+    conn_mock.execute = mocker.AsyncMock(
+        side_effect=DBAPIError("", {}, DeadlockDetectedError(""), False)
+    )
+    conn = AsyncConnection(conn_mock)
+
+    with pytest.raises(RetryableQueryError) as ex:
+        await conn.execute(sa.text(""))
+
+    assert isinstance(ex.value.__cause__, DeadlockDetectedError)
+    assert "Backing off execute(...)" in caplog.messages[-3]
+    assert "Backing off execute(...)" in caplog.messages[-2]
+    assert "Giving up execute(...)" in caplog.messages[-1]
