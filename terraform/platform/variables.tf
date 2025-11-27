@@ -18,6 +18,10 @@ variable "admin_email" {
   type = string
 }
 
+variable "domain" {
+  type = string
+}
+
 variable grafana_prometheus_url {
   type = string
 }

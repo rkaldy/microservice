@@ -4,6 +4,7 @@ inputs = {
   cluster_location =
   admin_email =
   k8s_namespace =
+  domain =
 
   grafana_prometheus_url =
   grafana_prometheus_username =
