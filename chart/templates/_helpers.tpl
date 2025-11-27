@@ -1,11 +1,4 @@
 {{/*
-Resource prefix
-*/}}
-{{- define "chart.prefix" -}}
-{{ if ne .Release.Name .Chart.Name }}{{ include "chart.prefix" . }}{{ end }}
-{{- end }}
-
-{{/*
 Common labels
 */}}
 {{- define "chart.labels" -}}

@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "chart.prefix" . }}migrate-db
+  name: migrate-db
   labels:
     {{- include "chart.labels" . | nindent 4 }}
   annotations:
@@ -11,7 +11,7 @@ metadata:
 spec:
   template:
     metadata:
-      name: {{ include "chart.prefix" . }}migrate-db
+      name: migrate-db
       labels:
         {{- include "chart.labels" . | nindent 8 }}
     spec:
@@ -23,9 +23,9 @@ spec:
           {{- include "chart.imageAndResources" (dict "root" .Values "ctx" .) | nindent 10 }}
           envFrom:
             - configMapRef:
-                name: {{ include "chart.prefix" . }}common
+                name: common
             - configMapRef:
-                name: {{ include "chart.prefix" . }}database
+                name: database
             - secretRef:
-                name: {{ include "chart.prefix" . }}secret
+                name: secret
           command: [ "alembic", "upgrade", "head" ]

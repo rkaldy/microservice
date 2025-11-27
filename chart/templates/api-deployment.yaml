@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "chart.prefix" . }}api
+  name: api
   labels:
     {{- include "chart.labels" . | nindent 4 }}
   annotations:
@@ -23,11 +23,11 @@ spec:
           {{- include "chart.imageAndResources" (dict "root" .Values "ctx" .Values.api) | nindent 10 }}
           envFrom:
             - configMapRef:
-                name: {{ include "chart.prefix" . }}common
+                name: common
             - configMapRef:
-                name: {{ include "chart.prefix" . }}database
+                name: database
             - secretRef:
-                name: {{ include "chart.prefix" . }}secret
+                name: secret
           command: [ "/app/scripts/run-api.sh" ]
           ports:
             - containerPort: 80
