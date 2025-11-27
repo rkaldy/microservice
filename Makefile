@@ -57,7 +57,8 @@ helm-template: # Render helm templates for BUILD_TARGET (default: dev). If TPL i
 
 install: # Deploy the application to the dev cluster. The current revision must be pushed to docker registry first. Intentionally allows only development deploy to prevent accidentally rewriting production cluster.
 	helm upgrade --install \
-	    --namespace $(PROJECT_NAME)-dev \
+		--namespace $(PROJECT_NAME)-dev \
+		--set env="dev" \
 		--set image.repository="$(IMAGE)" \
 		--set image.tag="$(TAG)" \
 		--values chart/values.yaml \

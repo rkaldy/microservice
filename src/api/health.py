@@ -42,3 +42,13 @@ async def readiness(
         description="API is ready.",
         connections={"db_version": db_version},
     )
+
+
+@router.get("/")
+async def root(db_conn: AsyncConnection = Depends(get_db_conn)) -> HealthcheckStatus:
+    """
+    GKE Gateway API makes regular health checks to "/" endpoint and this endpoint can't be
+    configured.
+    Thus we internally redirect "/" to "/-/readiness"
+    """
+    return await readiness(db_conn)

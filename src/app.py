@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from src.api.probe import router as probe_router
+from src.api.health import router as probe_router
 from src.api.v1.router import router as api_router
 from src.db.engine import AsyncEngine
 from src.settings.base import base_settings

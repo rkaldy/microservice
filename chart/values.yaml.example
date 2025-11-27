@@ -14,6 +14,7 @@ resources:
 app:
   logLevel: "info"
   sentryDSN:
+  domain:
 
 db:
   connectionPool:
@@ -33,9 +34,5 @@ api:
   replicaCount: 2
   serverWorkers: 2
   service: {}
-  ingress:
-    host:
+  route:
     path: "/"
-    tls:
-      enabled: true
-      certificateIssuer: letsencrypt

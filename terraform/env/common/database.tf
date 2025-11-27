@@ -61,7 +61,7 @@ resource "google_sql_user" "user" {
 }
 
 resource "google_secret_manager_secret" "db_user_password" {
-  secret_id = "${var.k8s_namespace}-${var.env}-db-password"
+  secret_id = "${var.env}-db-password"
   replication {
     auto {}
   }

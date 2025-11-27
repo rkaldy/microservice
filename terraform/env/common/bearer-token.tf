@@ -4,7 +4,7 @@ resource "random_password" "bearer_token" {
 }
 
 resource "google_secret_manager_secret" "bearer_token" {
-  secret_id = "${var.k8s_namespace}-${var.env}-bearer-token"
+  secret_id = "${var.env}-bearer-token"
   replication {
     auto {}
   }
