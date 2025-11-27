@@ -1,6 +1,5 @@
 import contextlib
 import logging
-import ssl
 from typing import AsyncIterator
 
 import sqlalchemy
@@ -29,15 +28,6 @@ class AsyncEngine:
         self._engine: sqlalchemy.ext.asyncio.engine.AsyncEngine | None = None
         self.dsn = settings.db_dsn
         self.config = kwargs
-        if settings.DB_SSL_ENABLED:
-            ssl_ctx = ssl.create_default_context(cafile=settings.DB_SSL_CA_PATH)
-            if settings.DB_SSL_VERIFY_CERT:
-                ssl_ctx.check_hostname = True
-                ssl_ctx.verify_mode = ssl.CERT_REQUIRED
-            else:
-                ssl_ctx.check_hostname = False
-                ssl_ctx.verify_mode = ssl.CERT_NONE
-            self.config["connect_args"] = {"ssl": ssl_ctx}
 
     async def __aenter__(self) -> "AsyncEngine":
         self._engine = create_async_engine(self.dsn, **self.config)

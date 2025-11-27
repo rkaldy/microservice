@@ -19,8 +19,3 @@ data:
   DB_POOL_RECYCLE: {{ .Values.db.connectionPool.recycleAfter | quote }}
   DB_QUERY_RETRY_COUNT: {{ .Values.db.retry.count | quote }}
   DB_QUERY_RETRY_WAIT_ARGS: {{ .Values.db.retry.wait | toJson | squote }}
-{{- if .Values.db.ssl }}
-  DB_SSL_ENABLED: {{ .Values.db.ssl.enabled | quote }}
-  DB_SSL_VERIFY_CERT: {{ .Values.db.ssl.verifyCertificate | quote }}
-  DB_SSL_CA_PATH: {{ .Values.db.ssl.CAPath | default "" | quote }}
-{{- end }}
