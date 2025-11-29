@@ -34,6 +34,10 @@ variable "ci_concurrent_jobs" {
   type = number
 }
 
+variable "ci_replicas" {
+  type = number
+}
+
 variable grafana_prometheus_url {
   type = string
 }

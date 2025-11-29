@@ -25,22 +25,16 @@ resource "helm_release" "gitlab_runner" {
   create_namespace = true
   atomic           = true
 
+  values = [file("${path.module}/gitlab-runner-values.yaml")]
+
   set = [
     {
       name  = "gitlabUrl"
       value = var.gitlab_base_url
     },
     {
-      name  = "runners.runUntagged"
-      value = true
-    },
-    {
-      name  = "rbac.create"
-      value = true
-    },
-    {
-      name  = "runners.executor"
-      value = "kubernetes"
+      name = "replicas"
+      value = var.ci_replicas
     },
     {
       name = "concurrent"

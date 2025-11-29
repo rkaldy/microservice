@@ -9,6 +9,7 @@ inputs = {
   gitlab_base_url = "https://gitlab.com"
   gitlab_project_path = "<namespace>/<name>"
   ci_concurrent_jobs = 10
+  ci_replicas = 1
 
   grafana_prometheus_url =
   grafana_prometheus_username =
