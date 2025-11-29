@@ -22,6 +22,18 @@ variable "domain" {
   type = string
 }
 
+variable "gitlab_base_url" {
+  type = string
+}
+
+variable "gitlab_project_path" {
+  type = string
+}
+
+variable "ci_concurrent_jobs" {
+  type = number
+}
+
 variable grafana_prometheus_url {
   type = string
 }

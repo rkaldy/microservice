@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/helm"
       version = "3.1.0"
     }
+    gitlab = {
+      source = "gitlabhq/gitlab"
+      version = "18.6.1"
+    }
   }
 }
 
