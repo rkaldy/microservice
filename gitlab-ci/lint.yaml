@@ -1,0 +1,13 @@
+pre-commit:
+  stage: lint
+  image: jfxs/pre-commit
+  before_script:
+    - PRE_COMMIT_HOME=.cache/pre-commit
+  script:
+    - pre-commit run --all-files --color always
+  cache:
+    key:
+      files:
+        - .pre-commit-config.yaml
+    paths:
+      - .cache/pre-commit
