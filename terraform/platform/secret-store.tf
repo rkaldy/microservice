@@ -12,7 +12,7 @@ resource "kubernetes_service_account" "secret_store" {
       "iam.gke.io/gcp-service-account" = google_service_account.secret_store.email
     }
   }
- }
+}
 
 resource "google_project_iam_member" "secret_store" {
   project  = var.project_id

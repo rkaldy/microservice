@@ -1,5 +1,7 @@
 stages:
-  - lint
+#  - lint
+  - build
 
 include:
-    - local: gitlab-ci/lint.yaml
+ #   - local: gitlab-ci/lint.yaml
+    - local: gitlab-ci/build.yaml

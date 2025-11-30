@@ -1,0 +1,28 @@
+.build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - gcloud auth configure-docker "europe-central2-docker.pkg.dev" --quiet
+    - /kaniko/executor
+      --context $CI_PROJECT_DIR
+      --destination "${DOCKER_REGISTRY}/${DOCKER_IMAGE}-${TARGET}:${CI_COMMIT_SHORT_SHA}"
+      --target=$TARGET
+      --cache=true
+      --cache-repo=$DOCKER_REGISTRY
+      --cache-ttl=120h
+      --verbosity=debug
+
+build-dev:
+  extends: .build
+  variables:
+    TARGET: dev
+
+#build-prod:
+#  extends: .build
+#  variables:
+#    TARGET: prod
+#  only:
+#    refs:
+#      - master
