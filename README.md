@@ -5,21 +5,21 @@ This repository provides a FastAPI-based microservice starter kit that already c
 access, observability, testing, and deployment tooling. Clone it, rename the packages, and focus on business logic
 instead of repeating boilerplate.
 
-- **Application**: `src/app.py` assembles the API server with shared middleware, authentication, metrics, and versioned
-  routers (for example `src/api/v1/router.py`) plus system endpoints living under `/-/liveness`, `/-/readiness`, and
-  `/-/metrics`.
-- **Data layer**: `src/db/engine.py` and `src/db/connection.py` expose an async SQLAlchemy engine with retry/backoff
-  logic, Alembic migrations live in `/alembic`, and `src/settings/base.py` wires environment-specific configuration for
-  PostgreSQL or MySQL.
+- **Application**: `src/app.py` boots the FastAPI server with simple Bearer authentication, health checks
+  (`/-/liveness`, `/-/readiness`), a metrics endpoint (`/-/metrics`), and an example versioned router at
+  `src/api/v1/router.py`.
+- **Data layer**: `src/db/engine.py` wraps SQLAlchemy with built-in retry/backoff logic, `src/db/connection.py`
+  exposes the async session, Alembic migrations live in `/alembic`, and `src/settings/base.py` centralizes the
+  environment-specific configuration for PostgreSQL or MySQL.
 - **Observability and resilience**: Structured logging (`src/utils/log.py`), Prometheus counters (`src/metrics.py` and
-  `PrometheusMetricsMiddleware`), and optional Sentry integration (`src/utils/sentry.py`) are enabled at startup so the
-  service emits actionable telemetry by default.
-- **Tooling and operations**: Poetry manages dependencies, the multi-stage `Dockerfile` targets both dev and prod,
-  `docker-compose.yaml` runs the API with local Postgres/MySQL, Helm manifests under `/chart`, Terraform modules under
-  `/terraform`, GitLab CI definitions under `/gitlab-ci`, and helper scripts/Make targets keep builds and deployments
-  consistent.
-- **Testing**: `tests/` contains pytest suites that bootstrap an isolated async engine (`tests/engine.py`) and validate
-  API authentication, metrics emission, and database retry behavior.
+  `PrometheusMetricsMiddleware`), and optional Sentry integration (`src/utils/sentry.py`) are wired in at startup so the
+  service emits useful telemetry out of the box.
+- **Tooling and operations**: Poetry manages dependencies, the multi-stage `Dockerfile` targets dev and prod images,
+  `docker-compose.yaml` orchestrates local services, Helm manifests live under `chart/`, Terraform modules under
+  `terraform/`, and CI pipelines under `gitlab-ci/`.
+- **Testing**: `tests/` ships with pytest suites that bootstrap an test database engine (`tests/engine.py`)
+- **Local run**: Use `docker-compose.yaml` for local containers, and lean on the `Makefile` targets for build, lint, and
+  test workflows.
 
 ## Prerequisites
 
@@ -27,6 +27,8 @@ instead of repeating boilerplate.
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 - [helm](https://helm.sh/docs/intro/install)
 - [terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)
+- [docker](https://docs.docker.com/engine/install/)
+- [poetry](https://python-poetry.org/)
 - [pre-commit](https://pre-commit.com/#install) (optional but recommended for local linting)
 
 ## Preparation
@@ -55,12 +57,6 @@ Configure the Kubernetes context:
 ```bash
 gcloud services enable container.googleapis.com
 gcloud container clusters get-credentials <your-cluster-name>
-```
-
-Install the pre-commit hooks:
-
-```bash
-pre-commit install
 ```
 
 ## Project Configuration
@@ -150,6 +146,29 @@ terragrunt init && terragrunt plan && terragrunt apply
 
 You can add, rename, or remove environment directories as needed, but remember to keep the GitLab CI pipelines under
 `gitlab-ci/` in sync with the desired environments.
+
+### Local environment
+
+Build the local Docker image:
+
+```bash
+poetry update
+make build
+```
+
+Install the pre-commit hooks:
+
+```bash
+pre-commit install
+```
+
+Initialize the local database (run the last command inside the container shell):
+
+```bash
+make up-d
+make bash
+alembic upgrade head
+```
 
 ### CI/CD
 
