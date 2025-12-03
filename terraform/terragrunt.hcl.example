@@ -1,9 +1,14 @@
 inputs = {
+  # Project ID in Google Console
   project_id =
+  # Name of your GKE cluster
   cluster_name =
+  # Location/region of your GKR cluster
   cluster_location =
+  # This email is used for notifying about HTTPS certificate issues
   admin_email =
   k8s_namespace =
+  # DNS domain of your service. The actual endpoints will be created at dev.<domain>, stage.<domain> and prod.<domain>
   domain =
 
   gitlab_base_url = "https://gitlab.com"

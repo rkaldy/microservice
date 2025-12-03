@@ -1,5 +1,5 @@
 image:
-  # Will be added from helm command
+  # Do not fill, Gitlab CI will fill it automatically
   repository: ""
   tag: ""
 
