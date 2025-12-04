@@ -2,6 +2,10 @@ stages:
 #  - lint
   - build
 
+default:
+  tags:
+    - k8s
+
 include:
  #   - local: gitlab-ci/lint.yaml
     - local: gitlab-ci/build.yaml

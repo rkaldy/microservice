@@ -452,10 +452,17 @@ runners:
   # runner configuration: https://docs.gitlab.com/runner/configuration/advanced-configuration.html
   config: |
     [[runners]]
+      executor = "kubernetes"
       [runners.kubernetes]
-        namespace = "gitlab-runner"
-        image = "alpine"
+        namespace = "{{ .Release.Namespace }}"
+        {{- range $secret := .Values.jobSecrets }}
+        [[runners.kubernetes.volumes.secret]]
+          name = "{{ $secret.name }}"
+          mount_path = "{{ $secret.mountPath }}"
+          read_only = true
+        {{- end -}}
 
+  tags: "k8s"
 
   ## Absolute path for an existing runner configuration file
   ## Can be used alongside "volumes" and "volumeMounts" to use an external config file
@@ -739,6 +746,15 @@ secrets: []
   #   items:
   #     - key: key_one
   #       path: path_one
+
+## Secrets to be additionally mounted to the job containers.
+## All secret items are mounted as files in specified mountPath.
+jobSecrets: []
+  # Example:
+  # - name: my-secret
+  #   mountPath: /path
+  # - name: other-secret
+  #   mountPath: /other/path
 
 ## Boolean to turn off the automountServiceAccountToken in the deployment
 ## ref: https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#bound-service-account-token-volume
