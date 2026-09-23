@@ -100,7 +100,7 @@ and any other runtime configuration.
 
 1. Create a project access token under **Settings → Access tokens**.
 2. Name the token `gitlab-runner`, grant the `Maintainer` role, and enable the `api` and `create_runner` scopes.
-3. Store the token in Google Secret Manager under the key `grafana-pat`
+3. Store the token in Google Secret Manager under the key `gitlab-pat`
 
 ### Grafana
 
