@@ -39,6 +39,12 @@ locals {
   })
 }
 
+resource "kubernetes_namespace" "gitlab_runner" {
+  metadata {
+    name = "gitlab-runner"
+  }
+}
+
 resource "kubernetes_secret" "gitlab_runner_docker_config" {
   metadata {
     name      = "docker-config"
@@ -56,7 +62,7 @@ resource "helm_release" "gitlab_runner" {
   repository       = "https://charts.gitlab.io"
   chart            = "gitlab-runner"
   namespace        = "gitlab-runner"
-  create_namespace = true
+  create_namespace = false
   atomic           = true
 
   values = [file("${path.module}/gitlab-runner-values.yaml")]

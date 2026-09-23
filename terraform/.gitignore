@@ -2,4 +2,5 @@
 terraform.tfstate*
 .terragrunt*
 terragrunt.hcl
-!platform/terragrunt.hcl
+!platform/crds/terragrunt.hcl
+!platform/resources/terragrunt.hcl

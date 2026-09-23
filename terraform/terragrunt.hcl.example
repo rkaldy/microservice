@@ -15,6 +15,7 @@ inputs = {
   gitlab_project_path = "<namespace>/<name>"
   ci_concurrent_jobs = 10
 
+  grafana_enabled = false
   grafana_prometheus_url =
   grafana_prometheus_username =
   grafana_loki_url =
