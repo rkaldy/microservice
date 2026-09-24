@@ -16,7 +16,7 @@ retryable_query_error_counter = Counter(
 
 http_error_counter = Counter(
     "http_errors",
-    "Count of error HTTP responses emitted by the API grouped by status code and path.",
+    "Count of error HTTP responses grouped by status code and route template.",
     ["status_code", "path"],
     registry=registry,
 )
