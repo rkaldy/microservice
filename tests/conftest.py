@@ -10,6 +10,7 @@ from alembic import command as alembic_command
 from src.api.deps import get_db_conn
 from src.app import create_api_app
 from src.db.connection import AsyncConnection
+from src.db.engine import AsyncEngine
 from src.settings.base import base_settings
 from tests.engine import TestAsyncEngine
 
@@ -20,18 +21,20 @@ def anyio_backend():
 
 
 @pytest.fixture(scope="session")
-async def db_engine() -> AsyncGenerator[TestAsyncEngine]:
+async def db_engine() -> AsyncGenerator[AsyncEngine]:
     async with TestAsyncEngine(base_settings) as engine:
+        await engine.drop_db_tables()
         alembic_config_path = Path(__name__).absolute().parent / "alembic.ini"
         upgrade_coro = asyncio.to_thread(
             alembic_command.upgrade, AlembicConfig(str(alembic_config_path)), "head"
         )
         await upgrade_coro
         yield engine
+        await engine.drop_db_tables()
 
 
 @pytest.fixture
-async def db_conn(db_engine: TestAsyncEngine) -> AsyncGenerator[AsyncConnection]:
+async def db_conn(db_engine: AsyncEngine) -> AsyncGenerator[AsyncConnection]:
     async with db_engine as engine, engine.connect() as conn, conn.transaction() as conn:
         yield conn
         await conn.rollback()
