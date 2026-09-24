@@ -115,5 +115,12 @@ class AsyncConnection:
                 raise RetryableQueryError(statement) from err.orig
             raise
 
-    def __getattr__(self, name: str):
-        return getattr(self._conn, name)
+    async def commit(self) -> None:
+        await self._conn.commit()
+
+    async def rollback(self) -> None:
+        await self._conn.rollback()
+
+    @property
+    def internal(self) -> sqlalchemy.ext.asyncio.AsyncConnection:
+        return self._conn

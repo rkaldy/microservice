@@ -9,6 +9,10 @@ class TestAsyncEngine(AsyncEngine):
     DB engine used in unit and integration tests
     """
 
+    async def __aenter__(self) -> "TestAsyncEngine":
+        await super().__aenter__()
+        return self
+
     async def drop_db_tables(self):
         if base_settings.DB_TYPE == "postgres":
             tables_stmt = sa.text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")

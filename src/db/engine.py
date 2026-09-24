@@ -43,5 +43,8 @@ class AsyncEngine:
         conn = self._engine.connect()
         return AsyncConnection(conn)
 
-    def __getattr__(self, name: str):
-        return getattr(self._engine, name)
+    @property
+    def internal(self) -> sqlalchemy.ext.asyncio.engine.AsyncEngine:
+        if not self._engine:
+            raise RuntimeError("AsyncEngine not initialized")
+        return self._engine

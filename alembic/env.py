@@ -66,7 +66,7 @@ async def run_migrations_online() -> None:
     methods.
     """
     async with AsyncEngine(base_settings) as engine, engine.connect() as connection:
-        await connection.run_sync(run_migrations_sync)
+        await connection.internal.run_sync(run_migrations_sync)
 
 
 if context.is_offline_mode():
