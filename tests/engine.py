@@ -1,9 +1,5 @@
-import contextlib
-from typing import AsyncIterator
-
 import sqlalchemy as sa
 
-from src.db.connection import AsyncConnection
 from src.db.engine import AsyncEngine
 from src.settings.base import base_settings
 
@@ -24,12 +20,6 @@ class TestAsyncEngine(AsyncEngine):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.drop_db_tables()
         await super().__aexit__(exc_type, exc_val, exc_tb)
-
-    @contextlib.asynccontextmanager
-    async def begin(self) -> AsyncIterator[AsyncConnection]:
-        async with super().begin() as conn:
-            yield conn
-            await conn.rollback()
 
     async def drop_db_tables(self):
         if base_settings.DB_TYPE == "postgres":

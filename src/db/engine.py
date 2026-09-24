@@ -1,6 +1,4 @@
-import contextlib
 import logging
-from typing import AsyncIterator
 
 import sqlalchemy
 from sqlalchemy import MetaData
@@ -44,12 +42,6 @@ class AsyncEngine:
             raise RuntimeError("AsyncEngine not initialized")
         conn = self._engine.connect()
         return AsyncConnection(conn)
-
-    @contextlib.asynccontextmanager
-    async def begin(self) -> AsyncIterator[AsyncConnection]:
-        conn = self.connect()
-        async with conn, conn.begin():
-            yield conn
 
     def __getattr__(self, name: str):
         return getattr(self._engine, name)

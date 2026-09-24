@@ -41,28 +41,77 @@ async def test_stream(db_conn: AsyncConnection, table: str):
 
 
 @pytest.mark.anyio
-async def test_retryable_query_error(mocker: MockerFixture, caplog):
+async def test_transaction_yields_wrapped_connection(mocker: MockerFixture):
+    conn_mock = mocker.Mock()
+    transaction_mock = mocker.MagicMock()
+    transaction_mock.__aenter__ = mocker.AsyncMock()
+    transaction_mock.__aexit__ = mocker.AsyncMock(return_value=False)
+    conn_mock.begin.return_value = transaction_mock
+    conn = AsyncConnection(conn_mock)
+
+    async with conn.transaction() as transaction_conn:
+        assert transaction_conn is conn
+
+    conn_mock.begin.assert_called_once_with()
+    transaction_mock.__aexit__.assert_awaited_once_with(None, None, None)
+
+
+@pytest.mark.anyio
+async def test_run_in_transaction(mocker: MockerFixture):
+    expected_result = mocker.sentinel.result
+    conn_mock = mocker.Mock()
+    conn_mock.execute = mocker.AsyncMock(return_value=expected_result)
+    transaction_mock = mocker.MagicMock()
+    transaction_mock.__aenter__ = mocker.AsyncMock()
+    transaction_mock.__aexit__ = mocker.AsyncMock(return_value=False)
+    conn_mock.begin.return_value = transaction_mock
+    conn = AsyncConnection(conn_mock)
+
+    result = await conn.run_in_transaction(sa.text("SELECT 1"))
+
+    assert result is expected_result
+    conn_mock.begin.assert_called_once_with()
+    transaction_mock.__aexit__.assert_awaited_once_with(None, None, None)
+
+
+@pytest.mark.anyio
+async def test_retryable_query_error_starts_new_transaction_for_each_attempt(
+    mocker: MockerFixture, caplog
+):
     conn_mock = mocker.Mock()
     conn_mock.execute = mocker.AsyncMock(side_effect=DBAPIError("", {}, DeadlockDetectedError("")))
+    transaction_mock = mocker.MagicMock()
+    transaction_mock.__aenter__ = mocker.AsyncMock()
+    transaction_mock.__aexit__ = mocker.AsyncMock(return_value=False)
+    conn_mock.begin.return_value = transaction_mock
     conn = AsyncConnection(conn_mock)
 
     with pytest.raises(RetryableQueryError) as ex:
-        await conn.execute(sa.text(""))
+        await conn.run_in_transaction(sa.text(""))
 
     assert isinstance(ex.value.__cause__, DeadlockDetectedError)
-    assert "Backing off execute(...)" in caplog.messages[-3]
-    assert "Backing off execute(...)" in caplog.messages[-2]
-    assert "Giving up execute(...)" in caplog.messages[-1]
+    assert conn_mock.begin.call_count == 3
+    assert transaction_mock.__aexit__.await_count == 3
+    assert all(call.args[0] is DBAPIError for call in transaction_mock.__aexit__.await_args_list)
+    assert "Backing off run_in_transaction(...)" in caplog.messages[-3]
+    assert "Backing off run_in_transaction(...)" in caplog.messages[-2]
+    assert "Giving up run_in_transaction(...)" in caplog.messages[-1]
 
 
 @pytest.mark.anyio
 async def test_non_retryable_query_error(mocker: MockerFixture, caplog):
     conn_mock = mocker.Mock()
     conn_mock.execute = mocker.AsyncMock(side_effect=DBAPIError("", {}, PostgresSyntaxError("")))
+    transaction_mock = mocker.MagicMock()
+    transaction_mock.__aenter__ = mocker.AsyncMock()
+    transaction_mock.__aexit__ = mocker.AsyncMock(return_value=False)
+    conn_mock.begin.return_value = transaction_mock
     conn = AsyncConnection(conn_mock)
 
     with pytest.raises(DBAPIError) as ex:
-        await conn.execute(sa.text(""))
+        await conn.run_in_transaction(sa.text(""))
 
     assert isinstance(ex.value.orig, PostgresSyntaxError)
+    conn_mock.begin.assert_called_once_with()
+    assert transaction_mock.__aexit__.await_args.args[0] is DBAPIError
     assert not caplog.messages

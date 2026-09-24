@@ -32,8 +32,9 @@ async def db_engine() -> AsyncGenerator[TestAsyncEngine]:
 
 @pytest.fixture
 async def db_conn(db_engine: TestAsyncEngine) -> AsyncGenerator[AsyncConnection]:
-    async with db_engine.begin() as conn:
+    async with db_engine as engine, engine.connect() as conn, conn.transaction() as conn:
         yield conn
+        await conn.rollback()
 
 
 @pytest.fixture
