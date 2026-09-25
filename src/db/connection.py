@@ -13,11 +13,6 @@ from src.settings.base import base_settings
 from src.utils.exceptions import RetryableQueryError
 
 
-def handle_retryable_query_error(details):
-    exc: RetryableQueryError = details["exception"]
-    retryable_query_error_counter.labels(error=exc.__cause__.__class__.__name__).inc()
-
-
 class AsyncConnection:
     """Application wrapper around a SQLAlchemy asynchronous connection."""
 
@@ -32,6 +27,27 @@ class AsyncConnection:
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
         await self._conn.__aexit__(exc_type, exc, tb)
+
+    def is_retryable_error(self, err: DBAPIError) -> bool:
+        dialect = self._conn.dialect.name
+        if dialect == "mysql":
+            error_code = getattr(err.orig, "args", (None,))[0]
+            return error_code in {
+                1205,  # lock wait timeout
+                1213,  # deadlock
+            }
+        elif dialect == "postgresql":
+            error_code = getattr(err.orig, "sqlstate", None)
+            return error_code in {
+                "40001",  # serialization failure
+                "40P01",  # deadlock detected
+            }
+        return False
+
+    @staticmethod
+    def _handle_retryable_query_error(details: dict[str, Any]) -> None:
+        exc: RetryableQueryError = details["exception"]
+        retryable_query_error_counter.labels(error=exc.__cause__.__class__.__name__).inc()
 
     async def execute(
         self,
@@ -83,7 +99,7 @@ class AsyncConnection:
         exception=RetryableQueryError,
         max_tries=base_settings.DB_QUERY_RETRY_COUNT,
         backoff_log_level=logging.WARNING,
-        on_giveup=handle_retryable_query_error,
+        on_giveup=_handle_retryable_query_error,
         giveup_log_level=logging.WARNING,
         **base_settings.DB_QUERY_RETRY_WAIT_ARGS,
     )
