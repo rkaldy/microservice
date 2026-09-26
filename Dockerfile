@@ -31,9 +31,6 @@ ENV VIRTUAL_ENV=/app/.venv \
     PYTHONUNBUFFERED=1
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends vim curl iputils-ping net-tools && \
-    apt-get clean
 RUN useradd --uid 1000 --user-group --no-create-home app
 RUN mkdir /tmp/prometheus && \
     chown app:app /tmp/prometheus
@@ -48,6 +45,9 @@ CMD ["scripts/run-api.sh"]
 
 
 FROM base AS dev
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends vim curl iputils-ping net-tools && \
+    apt-get clean
 COPY --from=deps-dev /app/.venv /app/.venv
 COPY tests tests
 
