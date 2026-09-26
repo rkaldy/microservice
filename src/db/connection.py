@@ -1,5 +1,6 @@
 import contextlib
 import logging
+from dataclasses import dataclass
 from typing import Any, AsyncIterator, Mapping, Optional, Sequence
 
 import backoff
@@ -9,8 +10,13 @@ from sqlalchemy.engine.interfaces import CoreExecuteOptionsParameter
 from sqlalchemy.exc import DBAPIError
 
 from src.metrics import retryable_query_error_counter
-from src.settings.base import base_settings
 from src.utils.exceptions import RetryableQueryError
+
+
+@dataclass(frozen=True, slots=True)
+class RetryPolicy:
+    max_tries: int
+    wait_args: Mapping[str, Any]
 
 
 class AsyncConnection:
@@ -18,8 +24,21 @@ class AsyncConnection:
 
     type ExecutableParameters = Sequence[Mapping[str, Any]] | Mapping[str, Any] | None
 
-    def __init__(self, conn: sqlalchemy.ext.asyncio.AsyncConnection):
+    def __init__(
+        self,
+        conn: sqlalchemy.ext.asyncio.AsyncConnection,
+        retry_policy: RetryPolicy,
+    ) -> None:
         self._conn = conn
+        self._run_in_transaction_with_backoff = backoff.on_exception(
+            wait_gen=backoff.expo,
+            exception=RetryableQueryError,
+            max_tries=retry_policy.max_tries,
+            backoff_log_level=logging.WARNING,
+            on_giveup=self._handle_retryable_query_error,
+            giveup_log_level=logging.WARNING,
+            **retry_policy.wait_args,
+        )(self._execute_with_retry)
 
     async def __aenter__(self) -> "AsyncConnection":
         await self._conn.__aenter__()
@@ -45,7 +64,7 @@ class AsyncConnection:
         return False
 
     @staticmethod
-    def _handle_retryable_query_error(details: dict[str, Any]) -> None:
+    def _handle_retryable_query_error(details: Any) -> None:
         exc: RetryableQueryError = details["exception"]
         retryable_query_error_counter.labels(error=exc.__cause__.__class__.__name__).inc()
 
@@ -94,15 +113,6 @@ class AsyncConnection:
         async with self._conn.begin():
             yield self
 
-    @backoff.on_exception(
-        wait_gen=backoff.expo,
-        exception=RetryableQueryError,
-        max_tries=base_settings.DB_QUERY_RETRY_COUNT,
-        backoff_log_level=logging.WARNING,
-        on_giveup=_handle_retryable_query_error,
-        giveup_log_level=logging.WARNING,
-        **base_settings.DB_QUERY_RETRY_WAIT_ARGS,
-    )
     async def run_in_transaction(
         self,
         statement: Executable,
@@ -120,14 +130,26 @@ class AsyncConnection:
         transaction. To retry a multi-statement operation atomically, put the retry
         boundary around the complete operation instead.
         """
+        return await self._run_in_transaction_with_backoff(
+            statement,
+            parameters,
+            execution_options=execution_options,
+        )
+
+    async def _execute_with_retry(
+        self,
+        statement: Executable,
+        parameters: ExecutableParameters = None,
+        *,
+        execution_options: Optional[CoreExecuteOptionsParameter] = None,
+    ) -> CursorResult[Any]:
         try:
             async with self._conn.begin():
                 return await self._conn.execute(
                     statement, parameters, execution_options=execution_options
                 )
         except DBAPIError as err:
-            err_type = err.orig.__class__.__name__
-            if err_type in base_settings.DB_QUERY_RETRYABLE_EXCEPTIONS:
+            if self.is_retryable_error(err):
                 raise RetryableQueryError(statement) from err.orig
             raise
 

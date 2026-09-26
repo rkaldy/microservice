@@ -15,15 +15,11 @@ class Settings(BaseSettings):
     DB_NAME: str
     DB_USER: str
     DB_PASSWORD: str
-    DB_SSL_ENABLED: bool = False
-    DB_SSL_VERIFY_CERT: bool = False
-    DB_SSL_CA_PATH: str = ""
 
     DB_POOL_SIZE: int
     DB_POOL_TIMEOUT: int
     DB_POOL_RECYCLE: int
 
-    DB_QUERY_RETRYABLE_EXCEPTIONS: set[str]
     DB_QUERY_RETRY_COUNT: int
     DB_QUERY_RETRY_WAIT_ARGS: dict[str, float]
 
@@ -34,6 +30,3 @@ class Settings(BaseSettings):
     @property
     def db_safe_dsn(self) -> str:
         return f"{DB_PROTOCOL_MAPPING[self.DB_TYPE]}://{self.DB_USER}:******@{self.DB_HOST}/{self.DB_NAME}"
-
-
-base_settings = Settings()

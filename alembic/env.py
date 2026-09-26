@@ -5,7 +5,7 @@ from logging.config import fileConfig
 from alembic import context
 from src.db.alembic import sa_metadata
 from src.db.engine import AsyncEngine
-from src.settings.base import base_settings
+from src.settings.base import Settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -28,6 +28,16 @@ target_metadata = sa_metadata
 # ... etc.
 
 
+def get_settings() -> Settings:
+    """Return settings supplied by the caller or load them from the environment."""
+    settings = config.attributes.get("settings")
+    if settings is None:
+        return Settings()
+    if not isinstance(settings, Settings):
+        raise TypeError("Alembic config attribute 'settings' must be a Settings instance")
+    return settings
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -41,7 +51,7 @@ def run_migrations_offline() -> None:
 
     """
     context.configure(
-        url=base_settings.db_dsn,
+        url=get_settings().db_dsn,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -65,7 +75,7 @@ async def run_migrations_online() -> None:
     wrap the migration routine in `run_sync()`, which allows synchronous calls of async driver
     methods.
     """
-    async with AsyncEngine(base_settings) as engine, engine.connect() as connection:
+    async with AsyncEngine(get_settings()) as engine, engine.connect() as connection:
         await connection.internal.run_sync(run_migrations_sync)
 
 

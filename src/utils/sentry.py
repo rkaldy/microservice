@@ -5,7 +5,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
 from sentry_sdk.types import Event, Hint
 
-from src.settings.base import base_settings
+from src.settings.base import Settings
 from src.utils.exceptions import RetryableQueryError
 
 
@@ -17,14 +17,14 @@ def filter_exceptions(event: Event, hint: Hint) -> Event | None:
     return event
 
 
-def init_sentry(server_name: str, component: str) -> None:
-    if not base_settings.SENTRY_DSN:
+def init_sentry(settings: Settings, server_name: str, component: str) -> None:
+    if not settings.SENTRY_DSN:
         return
 
     status_codes_to_sentry = [range(400, 403), range(404, 599)]
     sentry_sdk.init(
-        dsn=base_settings.SENTRY_DSN,
-        environment=base_settings.APP_ENV,
+        dsn=settings.SENTRY_DSN,
+        environment=settings.APP_ENV,
         server_name=server_name,
         integrations=[
             StarletteIntegration(
@@ -42,5 +42,5 @@ def init_sentry(server_name: str, component: str) -> None:
 
 
 def set_sentry_context(key: str, value: Any) -> None:
-    if base_settings.SENTRY_DSN:
+    if sentry_sdk.client:
         sentry_sdk.set_context(key, value)

@@ -1,10 +1,13 @@
 from prometheus_client import CollectorRegistry, Counter, multiprocess
 
-from src.settings.base import base_settings
+from src.settings.base import Settings
 
 registry = CollectorRegistry()
-if base_settings.API_SERVER_WORKERS > 1:
-    multiprocess.MultiProcessCollector(registry)
+
+
+def init_metrics(settings: Settings):
+    if settings.API_SERVER_WORKERS > 1:
+        multiprocess.MultiProcessCollector(registry)
 
 
 retryable_query_error_counter = Counter(

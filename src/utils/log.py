@@ -1,10 +1,10 @@
 import logging
 import sys
 
-from src.settings.base import base_settings
+from src.settings.base import Settings
 
 
-def prepare_logging():
+def prepare_logging(settings: Settings):
     logger = logging.getLogger()
     log_handler = logging.StreamHandler(sys.stdout)
     log_handler.setFormatter(
@@ -13,7 +13,7 @@ def prepare_logging():
 
     logger.handlers.clear()
     logger.addHandler(log_handler)
-    logger.setLevel(getattr(logging, base_settings.LOG_LEVEL.upper()))
+    logger.setLevel(getattr(logging, settings.LOG_LEVEL.upper()))
 
     uvicorn_access_logger = logging.getLogger("uvicorn.access")
     uvicorn_access_logger.handlers = []

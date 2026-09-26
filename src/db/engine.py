@@ -4,7 +4,7 @@ import sqlalchemy
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from src.db.connection import AsyncConnection
+from src.db.connection import AsyncConnection, RetryPolicy
 from src.settings.base import Settings
 
 logger = logging.getLogger(__name__)
@@ -26,6 +26,10 @@ class AsyncEngine:
         self._engine: sqlalchemy.ext.asyncio.engine.AsyncEngine | None = None
         self.dsn = settings.db_dsn
         self.config = kwargs
+        self.retry_policy = RetryPolicy(
+            max_tries=settings.DB_QUERY_RETRY_COUNT,
+            wait_args=dict(settings.DB_QUERY_RETRY_WAIT_ARGS),
+        )
 
     async def __aenter__(self) -> "AsyncEngine":
         self._engine = create_async_engine(self.dsn, **self.config)
@@ -41,7 +45,7 @@ class AsyncEngine:
         if not self._engine:
             raise RuntimeError("AsyncEngine not initialized")
         conn = self._engine.connect()
-        return AsyncConnection(conn)
+        return AsyncConnection(conn, self.retry_policy)
 
     @property
     def internal(self) -> sqlalchemy.ext.asyncio.engine.AsyncEngine:

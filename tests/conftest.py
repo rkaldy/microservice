@@ -11,7 +11,7 @@ from src.api.deps import get_db_conn
 from src.app import create_api_app
 from src.db.connection import AsyncConnection
 from src.db.engine import AsyncEngine
-from src.settings.base import base_settings
+from src.settings.base import Settings
 from tests.engine import TestAsyncEngine
 
 
@@ -21,13 +21,18 @@ def anyio_backend():
 
 
 @pytest.fixture(scope="session")
-async def db_engine() -> AsyncGenerator[AsyncEngine]:
-    async with TestAsyncEngine(base_settings) as engine:
+def settings() -> Settings:
+    return Settings()
+
+
+@pytest.fixture(scope="session")
+async def db_engine(settings: Settings) -> AsyncGenerator[AsyncEngine]:
+    async with TestAsyncEngine(settings) as engine:
         await engine.drop_db_tables()
         alembic_config_path = Path(__name__).absolute().parent / "alembic.ini"
-        upgrade_coro = asyncio.to_thread(
-            alembic_command.upgrade, AlembicConfig(str(alembic_config_path)), "head"
-        )
+        alembic_config = AlembicConfig(str(alembic_config_path))
+        alembic_config.attributes["settings"] = settings
+        upgrade_coro = asyncio.to_thread(alembic_command.upgrade, alembic_config, "head")
         await upgrade_coro
         yield engine
         await engine.drop_db_tables()
@@ -41,10 +46,10 @@ async def db_conn(db_engine: AsyncEngine) -> AsyncGenerator[AsyncConnection]:
 
 
 @pytest.fixture
-async def api_app(db_conn: AsyncConnection) -> AsyncGenerator[FastAPI]:
+async def api_app(db_conn: AsyncConnection, settings: Settings) -> AsyncGenerator[FastAPI]:
     """
     Creates a FastAPI app instance, using database connections from TestAsyncEngine
     """
-    app = create_api_app()
+    app = create_api_app(settings)
     app.dependency_overrides[get_db_conn] = lambda: db_conn
     yield app
