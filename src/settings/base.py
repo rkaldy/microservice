@@ -1,6 +1,7 @@
 from enum import Enum
 
 from pydantic_settings import BaseSettings
+from sqlalchemy import URL
 
 
 class DBType(Enum):
@@ -34,10 +35,19 @@ class Settings(BaseSettings):
     DB_QUERY_RETRY_COUNT: int
     DB_QUERY_RETRY_WAIT_ARGS: dict[str, float]
 
+    def _db_url(self) -> URL:
+        return URL.create(
+            drivername=DB_PROTOCOL_MAPPING[self.DB_TYPE],
+            username=self.DB_USER,
+            password=self.DB_PASSWORD,
+            host=self.DB_HOST,
+            database=self.DB_NAME,
+        )
+
     @property
     def db_dsn(self) -> str:
-        return f"{DB_PROTOCOL_MAPPING[self.DB_TYPE]}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}"
+        return self._db_url().render_as_string(hide_password=False)
 
     @property
     def db_safe_dsn(self) -> str:
-        return f"{DB_PROTOCOL_MAPPING[self.DB_TYPE]}://{self.DB_USER}:******@{self.DB_HOST}/{self.DB_NAME}"
+        return self._db_url().render_as_string(hide_password=True)
