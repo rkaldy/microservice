@@ -22,7 +22,7 @@ class TestAsyncEngine(AsyncEngine):
                 for row in tables.fetchall():
                     drop_stmt = sa.text(f"DROP TABLE IF EXISTS {row[0]} CASCADE")
                     await conn.execute(drop_stmt)
-        elif dialect == DBType.POSTGRESQL.value:
+        elif dialect == DBType.MYSQL.value:
             tables_stmt = sa.text(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = :db"
             )
