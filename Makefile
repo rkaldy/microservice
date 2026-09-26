@@ -9,6 +9,8 @@ IMAGE = $(DOCKER_REGISTRY)/$(PROJECT_NAME)
 TAG = $(shell git rev-parse --short=8 HEAD)
 BUILD_TARGET ?= dev
 CONTAINER_ID ?= $(PROJECT_NAME)-api-1
+COMPOSE_UP_ARGS ?=
+DOCKER_EXEC_FLAGS ?= -it
 TA ?= -v --ignore=tests/e2e/ tests/
 
 build: # Build the app container
@@ -19,13 +21,16 @@ up: # Spin up the project
 	docker compose -p $(PROJECT_NAME) -f docker-compose.yaml up
 
 up-d: # Spin up the project in the background
-	docker compose -p $(PROJECT_NAME) -f docker-compose.yaml up -d
+	docker compose -p $(PROJECT_NAME) -f docker-compose.yaml up -d $(COMPOSE_UP_ARGS)
 
 down: # Tear down the project
 	docker compose -p $(PROJECT_NAME) -f docker-compose.yaml down
 
+logs: # Show container logs
+	docker compose -p $(PROJECT_NAME) -f docker-compose.yaml logs --no-color
+
 test: # Run tests in project, optionally set CONTAINER_ID for docker name and TA for test arguments
-	docker exec -it $(CONTAINER_ID) pytest $(TA)
+	docker exec $(DOCKER_EXEC_FLAGS) $(CONTAINER_ID) pytest $(TA)
 
 retest: # Run tests from the last failed test
 	docker exec -it $(CONTAINER_ID) pytest --lf -v tests/
