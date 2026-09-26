@@ -10,6 +10,7 @@ from sqlalchemy.engine.interfaces import CoreExecuteOptionsParameter
 from sqlalchemy.exc import DBAPIError
 
 from src.metrics import retryable_query_error_counter
+from src.settings.base import DBType
 from src.utils.exceptions import RetryableQueryError
 
 
@@ -49,13 +50,13 @@ class AsyncConnection:
 
     def is_retryable_error(self, err: DBAPIError) -> bool:
         dialect = self._conn.dialect.name
-        if dialect == "mysql":
+        if dialect == DBType.MYSQL.value:
             error_code = getattr(err.orig, "args", (None,))[0]
             return error_code in {
                 1205,  # lock wait timeout
                 1213,  # deadlock
             }
-        elif dialect == "postgresql":
+        elif dialect == DBType.POSTGRESQL.value:
             error_code = getattr(err.orig, "sqlstate", None)
             return error_code in {
                 "40001",  # serialization failure

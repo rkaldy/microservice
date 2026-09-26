@@ -1,6 +1,17 @@
+from enum import Enum
+
 from pydantic_settings import BaseSettings
 
-DB_PROTOCOL_MAPPING: dict[str, str] = {"mysql": "mysql+aiomysql", "postgres": "postgresql+asyncpg"}
+
+class DBType(Enum):
+    MYSQL = "mysql"
+    POSTGRESQL = "postgresql"
+
+
+DB_PROTOCOL_MAPPING: dict[DBType, str] = {
+    DBType.MYSQL: "mysql+aiomysql",
+    DBType.POSTGRESQL: "postgresql+asyncpg",
+}
 
 
 class Settings(BaseSettings):
@@ -10,7 +21,7 @@ class Settings(BaseSettings):
     BEARER_TOKEN: str | None = None
     API_SERVER_WORKERS: int = 1
 
-    DB_TYPE: str
+    DB_TYPE: DBType
     DB_HOST: str
     DB_NAME: str
     DB_USER: str

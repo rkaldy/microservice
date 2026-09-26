@@ -33,18 +33,17 @@ class AsyncEngine:
 
     async def __aenter__(self) -> "AsyncEngine":
         self._engine = create_async_engine(self.dsn, **self.config)
-        logger.info("Connected to database server.")
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         if self._engine:
             await self._engine.dispose()
-        logger.info("Disconnected from database server.")
 
     def connect(self) -> AsyncConnection:
         if not self._engine:
             raise RuntimeError("AsyncEngine not initialized")
         conn = self._engine.connect()
+        logger.info("Connected to database server.")
         return AsyncConnection(conn, self.retry_policy)
 
     @property
