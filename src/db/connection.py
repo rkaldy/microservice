@@ -48,15 +48,24 @@ class AsyncConnection:
     async def __aexit__(self, exc_type, exc, tb) -> None:
         await self._conn.__aexit__(exc_type, exc, tb)
 
+    @staticmethod
+    def database_type(dialect: str) -> DBType | None:
+        if dialect.startswith("postgresql"):
+            return DBType.POSTGRESQL
+        elif dialect.startswith("mysql"):
+            return DBType.MYSQL
+        else:
+            return None
+
     def is_retryable_error(self, err: DBAPIError) -> bool:
-        dialect = self._conn.dialect.name
-        if dialect == DBType.MYSQL.value:
+        db_type = self.database_type(self._conn.dialect.name)
+        if db_type == DBType.MYSQL:
             error_code = getattr(err.orig, "args", (None,))[0]
             return error_code in {
                 1205,  # lock wait timeout
                 1213,  # deadlock
             }
-        elif dialect == DBType.POSTGRESQL.value:
+        elif db_type == DBType.POSTGRESQL:
             error_code = getattr(err.orig, "sqlstate", None)
             return error_code in {
                 "40001",  # serialization failure

@@ -10,6 +10,9 @@ from src.utils.exceptions import RetryableQueryError
 
 
 def filter_exceptions(event: Event, hint: Hint) -> Event | None:
+    # Do not flood Sentry with deadlock and serialization exceptions,
+    # there are Prometheus metrics for them.
+
     if "exc_info" in hint:
         exception = hint["exc_info"][1]
         if isinstance(exception, RetryableQueryError):

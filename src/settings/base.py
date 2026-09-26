@@ -6,7 +6,7 @@ from sqlalchemy import URL
 
 class DBType(Enum):
     MYSQL = "mysql"
-    POSTGRESQL = "postgresql"
+    POSTGRESQL = "postgres"
 
 
 DB_PROTOCOL_MAPPING: dict[DBType, str] = {

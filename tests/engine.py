@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 
+from src.db.connection import AsyncConnection
 from src.db.engine import AsyncEngine
 from src.settings.base import DBType
 
@@ -14,15 +15,15 @@ class TestAsyncEngine(AsyncEngine):
         return self
 
     async def drop_db_tables(self):
-        dialect = self._engine.dialect.name
-        if dialect == DBType.POSTGRESQL.value:
+        db_type = AsyncConnection.database_type(self._engine.dialect.name)
+        if db_type == DBType.POSTGRESQL:
             tables_stmt = sa.text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
             async with self.connect() as conn, conn.transaction():
                 tables = await conn.execute(tables_stmt)
                 for row in tables.fetchall():
                     drop_stmt = sa.text(f"DROP TABLE IF EXISTS {row[0]} CASCADE")
                     await conn.execute(drop_stmt)
-        elif dialect == DBType.MYSQL.value:
+        elif db_type == DBType.MYSQL:
             tables_stmt = sa.text(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = :db"
             )
@@ -32,5 +33,3 @@ class TestAsyncEngine(AsyncEngine):
                 for row in tables.fetchall():
                     drop_stmt = sa.text(f"DROP TABLE IF EXISTS {row[0]}")
                     await conn.execute(drop_stmt)
-        else:
-            raise RuntimeError(f"Unknown database type {dialect}")
