@@ -17,7 +17,6 @@ asyncpg = "^0.30.0"  # remove db driver you won't use
 aiomysql = "^0.2.0"
 cryptography = "^46.0.3"
 uvicorn = "^0.34.2"
-gunicorn = "^23.0.0"
 typer = "^0.15.4"
 orjson = "^3.10.18"
 prometheus-client = "^0.22.0"

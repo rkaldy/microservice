@@ -30,7 +30,6 @@ db:
 
 api:
   replicaCount: 2
-  serverWorkers: 2
   service: {}
   route:
     path: "/"

@@ -6,7 +6,6 @@ from src.api.health import router as probe_router
 from src.api.metrics import router as metrics_router
 from src.api.v1.router import router as api_router
 from src.db.engine import AsyncEngine
-from src.metrics import init_metrics
 from src.prometheus_middleware import PrometheusMetricsMiddleware
 from src.settings.base import Settings
 from src.utils.log import prepare_logging
@@ -18,7 +17,6 @@ def create_api_app(settings: Settings | None = None):
 
     prepare_logging(settings)
     init_sentry(settings, server_name="api-server", component="api")
-    init_metrics(settings)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):

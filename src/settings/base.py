@@ -20,7 +20,6 @@ class Settings(BaseSettings):
     LOG_LEVEL: str
     SENTRY_DSN: str | None = None
     BEARER_TOKEN: str | None = None
-    API_SERVER_WORKERS: int = 1
 
     DB_TYPE: DBType
     DB_HOST: str
