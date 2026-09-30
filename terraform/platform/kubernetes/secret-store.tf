@@ -6,8 +6,8 @@ resource "google_service_account" "secret_store" {
 
 resource "kubernetes_service_account" "secret_store" {
   metadata {
-    name        = "secret-store"
-    namespace   = "external-secrets"
+    name      = "secret-store"
+    namespace = "external-secrets"
     annotations = {
       "iam.gke.io/gcp-service-account" = google_service_account.secret_store.email
     }
@@ -15,15 +15,15 @@ resource "kubernetes_service_account" "secret_store" {
 }
 
 resource "google_project_iam_member" "secret_store" {
-  project  = var.project_id
-  role     = "roles/secretmanager.secretAccessor"
-  member   = "serviceAccount:${google_service_account.secret_store.email}"
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${google_service_account.secret_store.email}"
 }
 
 resource "google_service_account_iam_member" "secrets_workload_identity" {
   service_account_id = google_service_account.secret_store.name
-  role   = "roles/iam.workloadIdentityUser"
-  member = "serviceAccount:${var.project_id}.svc.id.goog[external-secrets/secret-store]"
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[external-secrets/secret-store]"
 }
 
 resource "kubernetes_manifest" "secret_store" {

@@ -1,9 +1,17 @@
-include {
-  path = find_in_parent_folders()
+include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+
+include "providers" {
+  path = find_in_parent_folders("providers.hcl")
 }
 
 terraform {
   source = "..//."
+}
+
+dependencies {
+  paths = ["../../platform/kubernetes"]
 }
 
 inputs = {

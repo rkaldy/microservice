@@ -1,9 +1,10 @@
 data "google_secret_manager_secret_version" "grafana" {
+  count = var.grafana_enabled ? 1 : 0
+
   project = var.project_id
   secret  = "grafana-password"
   version = "latest"
 }
-
 
 resource "helm_release" "grafana-k8s-monitoring" {
   count = var.grafana_enabled ? 1 : 0
@@ -47,7 +48,7 @@ resource "helm_release" "grafana-k8s-monitoring" {
     },
     {
       name  = "destinations[0].auth.password"
-      value = data.google_secret_manager_secret_version.grafana.secret_data
+      value = data.google_secret_manager_secret_version.grafana[0].secret_data
     },
     {
       name  = "destinations[1].auth.username"
@@ -55,7 +56,7 @@ resource "helm_release" "grafana-k8s-monitoring" {
     },
     {
       name  = "destinations[1].auth.password"
-      value = data.google_secret_manager_secret_version.grafana.secret_data
+      value = data.google_secret_manager_secret_version.grafana[0].secret_data
     }
   ]
 }

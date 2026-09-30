@@ -3,7 +3,7 @@ inputs = {
   project_id =
   # Name of your GKE cluster
   cluster_name =
-  # Location/region of your GKR cluster
+  # Location/region of your GKE cluster
   cluster_location =
   # This email is used for notifying about HTTPS certificate issues
   admin_email =
@@ -11,9 +11,8 @@ inputs = {
   # DNS domain of your service. The actual endpoints will be created at dev.<domain>, stage.<domain> and prod.<domain>
   domain =
 
-  gitlab_base_url = "https://gitlab.com"
-  gitlab_project_path = "<namespace>/<name>"
-  ci_concurrent_jobs = 10
+  github_user =
+  github_repo =
 
   grafana_enabled = false
   grafana_prometheus_url =

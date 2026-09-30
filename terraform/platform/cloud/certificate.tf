@@ -10,15 +10,14 @@ resource "google_dns_record_set" "dns_auth_wildcard_record" {
   type         = google_certificate_manager_dns_authorization.dns_auth.dns_resource_record[0].type
   managed_zone = google_dns_managed_zone.managed_zone.name
   ttl          = 300
-  rrdatas      = [
-    google_certificate_manager_dns_authorization.dns_auth.dns_resource_record[0].data
-  ]
+  rrdatas      = [google_certificate_manager_dns_authorization.dns_auth.dns_resource_record[0].data]
 }
 
 resource "google_certificate_manager_certificate" "global" {
   project = var.project_id
   name    = "global"
   scope   = "DEFAULT"
+
   managed {
     domains            = [var.domain, "*.${var.domain}"]
     dns_authorizations = [google_certificate_manager_dns_authorization.dns_auth.id]

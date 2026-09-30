@@ -14,6 +14,14 @@ variable "k8s_namespace" {
   type = string
 }
 
+variable "github_user" {
+  type = string
+}
+
+variable "github_repo" {
+  type = string
+}
+
 variable "env" {
   type = string
 }

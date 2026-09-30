@@ -23,12 +23,14 @@ inputs = {
     memory              = 3.75
     disk_size           = 10
     disk_autoresize     = true
-    deletion_protection = true
+    deletion_protection = false
     availability_type   = "ZONAL"
-    backup_enabled      = true
+    backup_enabled      = false
     backup_time         = "00:30"
     maintenance_day     = 7
     maintenance_hour    = 1
-    flags               = {}
+    flags = {
+      max_connections = 50
+    }
   }
 }

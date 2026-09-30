@@ -5,3 +5,9 @@ provider "kubernetes" {
     data.google_container_cluster.cluster.master_auth[0].cluster_ca_certificate
   )
 }
+
+resource "kubernetes_namespace" "ns" {
+  metadata {
+    name = "${var.k8s_namespace}-${var.env}"
+  }
+}

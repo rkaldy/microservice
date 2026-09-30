@@ -38,7 +38,7 @@ resource "google_sql_database_instance" "db" {
     }
 
     ip_configuration {
-      ipv4_enabled = false
+      ipv4_enabled    = false
       private_network = data.google_compute_network.default.self_link
     }
   }
@@ -79,9 +79,9 @@ resource "kubernetes_config_map" "db" {
   }
 
   data = {
-    DB_TYPE  = lower(split("_", var.database.type_version)[0])
-    DB_HOST  = google_sql_database_instance.db.ip_address[0].ip_address
-    DB_NAME  = google_sql_database.db.name
-    DB_USER  = google_sql_user.user.name
+    DB_TYPE = lower(split("_", var.database.type_version)[0])
+    DB_HOST = google_sql_database_instance.db.ip_address[0].ip_address
+    DB_NAME = google_sql_database.db.name
+    DB_USER = google_sql_user.user.name
   }
 }

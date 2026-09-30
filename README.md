@@ -52,13 +52,6 @@ Set the default project configuration:
 gcloud config set project <your-project-id>
 ```
 
-Configure the Kubernetes context:
-
-```bash
-gcloud services enable container.googleapis.com
-gcloud container clusters get-credentials <your-cluster-name>
-```
-
 ## Project Configuration
 
 Use this template as a skeleton for your new project and update the following areas before the first deployment.
@@ -86,7 +79,7 @@ The template is prepared for either PostgreSQL or MySQL:
 
 ### Terraform
 
-Copy `terragrunt/terragrunt.hcl.example` to `terragrunt/terragrunt.hcl` and populate the variables to match
+Copy `terragrunt/root.hcl.example` to `terragrunt/root.hcl` and populate the variables to match
 your environment (project IDs, regions, secrets, etc.).
 
 ### Helm charts
@@ -96,16 +89,15 @@ and any other runtime configuration.
 
 ## External Service Credentials
 
-### GitLab
+### GitHub
 
-1. Create a project access token under **Settings → Access tokens**.
-2. Name the token `gitlab-runner`, grant the `Maintainer` role, and enable the `api` and `create_runner` scopes.
-3. Store the token in Google Secret Manager under the key `gitlab-pat`
+GitHub Actions deployments are designed to use Workload Identity Federation. Create the shared identity pool and provider
+before applying an application environment; do not use a long-lived Google service-account key.
 
 ### Grafana
 
 1. In Grafana Cloud or Enterprise, navigate to **Get Started → Logs → Kubernetes** to generate the deployment wizard.
-2. Reuse the usernames for Loki and Prometheus targets inside `terraform/terragrunt.hcl`; do **not** deploy using
+2. Reuse the usernames for Loki and Prometheus targets inside `terraform/root.hcl`; do **not** deploy using
    Grafana’s generated manifests.
 3. Click **Create token** and store the token in Google Secret Manager under the key `grafana-password`.
 
@@ -121,31 +113,38 @@ In Sentry, open **Settings → Projects → _<project>_ → SDK Setup → Client
 The `terraform/platform` stack provisions shared infrastructure such as:
 
 - Container registry
-- GitLab CI/CD runners
+- GitHub Actions Workload Identity Federation
+- GKE cluster
 - Grafana monitoring
 - DNS
 - Certificate management
 - Secret storage
 
-Run the following commands in `terraform/platform/helm_releases` first, because it installs Kubernetes CRDs required by
-the rest of the platform modules:
+The platform is split into Terragrunt units with an explicit dependency graph:
 
-```bash
-terragrunt init && terragrunt plan && terragrunt apply
+```text
+services ─┬─> cluster ─> crds ─┐
+          └─> cloud ───────────┴─> kubernetes
 ```
 
-After the CRDs are in place, repeat the same commands inside `terraform/platform`.
+For the initial bootstrap, run in the `terraform/platform` directory:
+
+```bash
+gcloud auth application-default login
+terragrunt run --all init
+terragrunt run --all apply
+```
 
 ### Microservice
 
-For each environment under `terraform/env`, run:
+For each environment under `terraform/env`, run from the corresponding directory:
 
 ```bash
 terragrunt init && terragrunt plan && terragrunt apply
 ```
 
-You can add, rename, or remove environment directories as needed, but remember to keep the GitLab CI pipelines under
-`gitlab-ci/` in sync with the desired environments.
+You can add, rename, or remove environment directories as needed, but keep the GitHub Actions environments and workflows
+in sync with the desired environments.
 
 ### Local environment
 
@@ -172,5 +171,5 @@ alembic upgrade head
 
 ### CI/CD
 
-Pipeline automation is under active development. Review the files in `gitlab-ci/` and adapt them to your project before
+Pipeline automation is under active development. Review the files in `.github/workflows/` and adapt them to your project before
 enabling deployments in production.

@@ -7,5 +7,5 @@ include "providers" {
 }
 
 dependencies {
-  paths = ["../cluster"]
+  paths = ["../services"]
 }

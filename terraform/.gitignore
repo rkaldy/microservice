@@ -1,6 +1,5 @@
 .terraform*
 terraform.tfstate*
 .terragrunt*
-terragrunt.hcl
-!platform/crds/terragrunt.hcl
-!platform/resources/terragrunt.hcl
+required-providers.generated.tf
+root.hcl
