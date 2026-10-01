@@ -93,10 +93,12 @@ jobs:
         run: |
           make push \
             BUILD_TARGET=dev \
-            DOCKER_REGISTRY="${{ vars.GKE_CLUSTER_LOCATION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/docker"
+            GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID}} \
+            GKE_CLUSTER_LOCATION=${{ vars.GKE_CLUSTER_LOCATION }}
 
       - name: Deploy to development cluster
         run: |
           make install \
             BUILD_TARGET=dev \
-            DOCKER_REGISTRY="${{ vars.GKE_CLUSTER_LOCATION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/docker"
+            GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID}} \
+            GKE_CLUSTER_LOCATION=${{ vars.GKE_CLUSTER_LOCATION }}

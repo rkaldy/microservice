@@ -50,3 +50,41 @@ resource "kubernetes_role_binding" "github_deployer" {
     name      = google_service_account.github_deployer.email
   }
 }
+
+resource "kubernetes_role" "github_deployer_custom_resources" {
+  metadata {
+    name      = "github-deployer-custom-resources"
+    namespace = kubernetes_namespace.ns.metadata[0].name
+  }
+
+  rule {
+    api_groups = ["gateway.networking.k8s.io"]
+    resources  = ["httproutes"]
+    verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
+  }
+
+  rule {
+    api_groups = ["external-secrets.io"]
+    resources  = ["externalsecrets"]
+    verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
+  }
+}
+
+resource "kubernetes_role_binding" "github_deployer_custom_resources" {
+  metadata {
+    name      = "github-deployer-custom-resources"
+    namespace = kubernetes_namespace.ns.metadata[0].name
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.github_deployer_custom_resources.metadata[0].name
+  }
+
+  subject {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "User"
+    name      = google_service_account.github_deployer.email
+  }
+}

@@ -82,7 +82,7 @@ The template is prepared for either PostgreSQL or MySQL:
 
 ### Terraform
 
-Copy `terragrunt/root.hcl.example` to `terragrunt/root.hcl` and populate the variables to match
+Rename `terragrunt/root.hcl.example` to `terragrunt/root.hcl` and populate the variables to match
 your environment (project IDs, regions, secrets, etc.).
 
 ### Helm charts
@@ -130,7 +130,8 @@ services ─┬─> cluster ─> crds ─┐
           └─> cloud ───────────┴─> kubernetes
 ```
 
-For the initial bootstrap, run in the `terraform/platform` directory:
+For the initial bootstrap, copy `terraform/root.hcl.example` to `terrafrom/root.hcl` and fill all variable values.
+Then run in the `terraform/platform` directory:
 
 ```bash
 gcloud auth application-default login
@@ -149,7 +150,7 @@ terragrunt init && terragrunt plan && terragrunt apply
 You can add, rename, or remove environment directories as needed, but keep the GitHub Actions environments and workflows
 in sync with the desired environments.
 
-### Local environment
+## Local development
 
 Build the local Docker image:
 
@@ -172,15 +173,29 @@ make bash
 alembic upgrade head
 ```
 
-To allow pushing docker images to Google Artifact Registry:
+### Pushh docker images
+
+To allow pushing docker images to Google Artifact Registry, run once:
 
 ```bash
 gcloud auth configure-docker <cluster-location>-docker.pkg.dev
 ```
 
-Then you can push the images directly from your local machine with `make push`.
+Push docker image to the artifact registry:
 
-### CI/CD
+```bash
+make push
+```
+
+### Deployment to the Google Cluster
+
+Rename `charts/values.yaml.example` to `charts/values.yaml` and fill all variable values. Then run:
+
+```bash
+make install
+```
+
+## CI/CD
 
 Pipeline automation is under active development. Review the files in `.github/workflows/` and adapt them to your project before
 enabling deployments in production.
