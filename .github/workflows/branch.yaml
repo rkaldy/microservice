@@ -1,0 +1,21 @@
+name: CI (branch)
+
+on:
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: development
+  cancel-in-progress: true
+
+jobs:
+  pipeline:
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/pipeline.yaml
+    with:
+      environment: dev
+      deploy: true
+    secrets: inherit
