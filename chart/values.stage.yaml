@@ -1,0 +1,5 @@
+app:
+  environment: stage
+
+image:
+  pullPolicy: Always

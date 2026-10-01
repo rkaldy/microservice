@@ -1,22 +1,21 @@
-name: CI (development)
+name: Reusable CI/CD pipeline
 
 on:
-  push:
-    branches-ignore:
-      - master
-
-permissions:
-  contents: read
-
-concurrency:
-  group: ci-dev-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: true
+        type: string
+      deploy:
+        description: Deploy the pushed image to Kubernetes
+        required: true
+        type: boolean
 
 jobs:
   build-lint-test:
     name: Build, lint and test
     runs-on: ubuntu-latest
-    environment: dev
     timeout-minutes: 15
 
     steps:
@@ -34,7 +33,7 @@ jobs:
           python -m pip install "poetry==2.2" "pre-commit>=4.2,<5"
 
       - name: Build development image
-        run: make build BUILD_TARGET=dev
+        run: make build ENVIRONMENT=${{ inputs.environment }}
 
       - name: Lint
         run: make lint
@@ -53,11 +52,11 @@ jobs:
         if: always()
         run: make down
 
-  deploy:
-    name: Push image and deploy
+  publish:
+    name: Push image and optionally deploy
     needs: build-lint-test
     runs-on: ubuntu-latest
-    environment: dev
+    environment: ${{ inputs.environment }}
     timeout-minutes: 15
     permissions:
       contents: read
@@ -77,28 +76,31 @@ jobs:
         uses: google-github-actions/setup-gcloud@v3
 
       - name: Set up Helm
+        if: inputs.deploy
         uses: azure/setup-helm@v4
 
       - name: Authenticate Docker to Artifact Registry
         run: gcloud auth configure-docker "${{ vars.GKE_CLUSTER_LOCATION }}-docker.pkg.dev" --quiet
 
       - name: Get GKE credentials
+        if: inputs.deploy
         uses: google-github-actions/get-gke-credentials@v3
         with:
           cluster_name: ${{ vars.GKE_CLUSTER_NAME }}
           location: ${{ vars.GKE_CLUSTER_LOCATION }}
           project_id: ${{ vars.GCP_PROJECT_ID }}
 
-      - name: Push development image
+      - name: Push image
         run: |
           make push \
-            BUILD_TARGET=dev \
-            GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID}} \
+            ENVIRONMENT=${{ inputs.environment }} \
+            GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }} \
             GKE_CLUSTER_LOCATION=${{ vars.GKE_CLUSTER_LOCATION }}
 
-      - name: Deploy to development cluster
+      - name: Deploy to cluster
+        if: inputs.deploy
         run: |
           make install \
-            BUILD_TARGET=dev \
-            GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID}} \
+            ENVIRONMENT=${{ inputs.environment }} \
+            GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }} \
             GKE_CLUSTER_LOCATION=${{ vars.GKE_CLUSTER_LOCATION }}

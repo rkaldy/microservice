@@ -3,7 +3,8 @@ help: # Show help for each of the Makefile recipes
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m: $$(echo $$l | cut -f 2- -d'#')\n"; done
 
 PROJECT_NAME := $(shell grep "name:" chart/Chart.yaml | head -n 1 | cut -d " " -f 2)
-BUILD_TARGET ?= dev
+ENVIRONMENT ?= dev
+BUILD_TARGET := $(if $(filter dev,$(ENVIRONMENT)),dev,prod)
 
 TERRAGRUNT_INPUTS = cd terraform/platform/services && terragrunt render --json
 GCP_PROJECT_ID ?= $(shell $(TERRAGRUNT_INPUTS) | jq -r '.inputs.project_id')
@@ -51,27 +52,27 @@ migration: # Create alembic migration script from the current state, set MSG for
 	docker exec -it $(CONTAINER_ID) alembic revision --autogenerate -m "$(MSG)"
 	docker exec -it $(CONTAINER_ID) alembic upgrade head
 
-push: # Build image and push it to the registry. You can specify the build target (default: dev)
+push: # Build and push the image for BUILD_TARGET (default: dev)
 	docker build -t $(IMAGE):$(TAG) --target $(BUILD_TARGET) .
 	docker push $(IMAGE):$(TAG)
 
 TPL_FLAG := $(if $(strip $(TPL)),--show-only templates/$(TPL),)
-helm-template: # Render helm templates for BUILD_TARGET (default: dev). If TPL is set, it renders only only template.
-	@helm template -n $(PROJECT_NAME)-$(BUILD_TARGET) \
+helm-template: # Render helm templates for ENVIRONMENT (default: dev). If TPL is set, it renders only only template.
+	@helm template -n $(PROJECT_NAME)-$(ENVIRONMENT) \
 		--set image.repository="$(IMAGE)" \
 		--set image.tag="$(TAG)" \
 		--values chart/values.yaml \
-		--values chart/values.$(BUILD_TARGET).yaml \
+		--values chart/values.$(ENVIRONMENT).yaml \
 		$(TPL_FLAG) $(PROJECT_NAME) chart/
 
 install: # Deploy the application to the k8s cluster. The current revision must be pushed to docker registry first.
 	helm upgrade --install \
-		--namespace $(PROJECT_NAME)-$(BUILD_TARGET) \
+		--namespace $(PROJECT_NAME)-$(ENVIRONMENT) \
 		--set image.repository="$(IMAGE)" \
 		--set image.tag="$(TAG)" \
 		--values chart/values.yaml \
-		--values chart/values.$(BUILD_TARGET).yaml \
+		--values chart/values.$(ENVIRONMENT).yaml \
 		$(PROJECT_NAME) chart/
 
-uninstall: # Uninstall the application from the dev cluster. Intentionally allows only development deploy to prevent accidentally production cluster deletion.
-	helm uninstall --namespace $(PROJECT_NAME)-dev $(PROJECT_NAME)
+uninstall: # Uninstall the application from the k8s cluster.
+	helm uninstall --namespace $(PROJECT_NAME)-$(ENVIRONMENT) $(PROJECT_NAME)
