@@ -1,0 +1,34 @@
+image:
+  # Will be added from helm command
+  repository: ""
+  tag: ""
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 256Mi
+  requests:
+    cpu: 150m
+    memory: 128Mi
+
+app:
+  logLevel: "info"
+  sentryDSN: "https://4af4a5c17aff72f702472e40a4b529dd@o4510357795438592.ingest.de.sentry.io/4510357797470288"
+  domain: "micro.antonio.cz"
+
+db:
+  connectionPool:
+    size: 1
+    timeout: 10
+    recycleAfter: 1000
+  retry:
+    count: 3
+    wait:
+      factor: 1
+      base: 1.5
+
+api:
+  replicaCount: 2
+  service: {}
+  route:
+    path: "/"

@@ -6,9 +6,9 @@ PROJECT_NAME := $(shell grep "name:" chart/Chart.yaml | head -n 1 | cut -d " " -
 BUILD_TARGET ?= dev
 
 TERRAGRUNT_INPUTS = cd terraform/platform/services && terragrunt render --json
-GCP_PROJECT_ID = $(shell $(TERRAGRUNT_INPUTS) | jq -r '.inputs.project_id')
-GCP_LOCATION = $(shell $(TERRAGRUNT_INPUTS) | jq -r '.inputs.cluster_location')
-DOCKER_REGISTRY ?= $(GCP_LOCATION)-docker.pkg.dev/$(GCP_PROJECT_ID)/docker
+GCP_PROJECT_ID ?= $(shell $(TERRAGRUNT_INPUTS) | jq -r '.inputs.project_id')
+GKE_CLUSTER_LOCATION ?= $(shell $(TERRAGRUNT_INPUTS) | jq -r '.inputs.cluster_location')
+DOCKER_REGISTRY = $(GKE_CLUSTER_LOCATION)-docker.pkg.dev/$(GCP_PROJECT_ID)/docker
 IMAGE = $(DOCKER_REGISTRY)/$(PROJECT_NAME)
 TAG = $(shell git rev-parse --short=8 HEAD)
 
