@@ -32,8 +32,6 @@ ENV VIRTUAL_ENV=/app/.venv \
 WORKDIR /app
 
 RUN useradd --uid 1000 --user-group --no-create-home app
-RUN mkdir /tmp/prometheus && \
-    chown app:app /tmp/prometheus
 
 COPY src src
 COPY alembic alembic

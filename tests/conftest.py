@@ -26,7 +26,7 @@ def settings() -> Settings:
 async def db_engine(settings: Settings) -> AsyncGenerator[AsyncEngine]:
     async with TestAsyncEngine(settings) as engine:
         await engine.drop_db_tables()
-        alembic_config_path = Path(__name__).absolute().parent / "alembic.ini"
+        alembic_config_path = Path(__file__).resolve().parents[1] / "alembic.ini"
         alembic_config = AlembicConfig(str(alembic_config_path))
         alembic_config.attributes["settings"] = settings
         upgrade_coro = asyncio.to_thread(alembic_command.upgrade, alembic_config, "head")

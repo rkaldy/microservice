@@ -28,8 +28,13 @@ class TestAsyncEngine(AsyncEngine):
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = :db"
             )
             async with self.connect() as conn, conn.transaction():
-                await conn.execute(sa.text("SET FOREIGN_KEY_CHECKS=0"))
-                tables = await conn.execute(tables_stmt.bindparams(db=self._engine.url.database))
-                for row in tables.fetchall():
-                    drop_stmt = sa.text(f"DROP TABLE IF EXISTS {row[0]}")
-                    await conn.execute(drop_stmt)
+                try:
+                    await conn.execute(sa.text("SET FOREIGN_KEY_CHECKS=0"))
+                    tables = await conn.execute(
+                        tables_stmt.bindparams(db=self._engine.url.database)
+                    )
+                    for row in tables.fetchall():
+                        drop_stmt = sa.text(f"DROP TABLE IF EXISTS {row[0]}")
+                        await conn.execute(drop_stmt)
+                finally:
+                    await conn.execute(sa.text("SET FOREIGN_KEY_CHECKS=1"))
