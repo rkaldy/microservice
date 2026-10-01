@@ -3,7 +3,25 @@ from fastapi import FastAPI, Response
 from httpx import AsyncClient
 from prometheus_client import generate_latest
 
-from src.metrics import http_error_counter, registry
+from src.metrics import http_error_counter, registry, retryable_query_error_counter
+
+
+@pytest.mark.anyio
+async def test_metrics_endpoint(client: AsyncClient):
+    retry_metric = retryable_query_error_counter.labels(error="IntegrationTestError")
+    retry_metric._value.set(0)
+    try:
+        retry_metric.inc()
+
+        response = await client.get("/-/metrics")
+
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "text/plain; version=0.0.4; charset=utf-8"
+        assert "# HELP http_errors_total" in response.text
+        assert "# TYPE http_errors_total counter" in response.text
+        assert 'retryable_query_errors_total{error="IntegrationTestError"} 1.0' in response.text
+    finally:
+        retry_metric._value.set(0)
 
 
 @pytest.mark.anyio

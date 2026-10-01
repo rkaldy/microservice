@@ -4,11 +4,8 @@ from typing import AsyncGenerator
 
 import pytest
 from alembic.config import Config as AlembicConfig
-from fastapi import FastAPI
 
 from alembic import command as alembic_command
-from src.api.deps import get_db_conn
-from src.app import create_api_app
 from src.db.connection import AsyncConnection
 from src.db.engine import AsyncEngine
 from src.settings.base import Settings
@@ -43,13 +40,3 @@ async def db_conn(db_engine: AsyncEngine) -> AsyncGenerator[AsyncConnection]:
     async with db_engine.connect() as conn, conn.transaction() as conn:
         yield conn
         await conn.rollback()
-
-
-@pytest.fixture
-async def api_app(db_conn: AsyncConnection, settings: Settings) -> AsyncGenerator[FastAPI]:
-    """
-    Creates a FastAPI app instance, using database connections from TestAsyncEngine
-    """
-    app = create_api_app(settings)
-    app.dependency_overrides[get_db_conn] = lambda: db_conn
-    yield app
