@@ -138,7 +138,7 @@ terragrunt run --all init
 terragrunt run --all apply
 ```
 
-### Microservice
+### Application environment
 
 For each environment under `terraform/env`, run from the corresponding directory:
 
@@ -171,6 +171,14 @@ make up-d
 make bash
 alembic upgrade head
 ```
+
+To allow pushing docker images to Google Artifact Registry:
+
+```bash
+gcloud auth configure-docker <cluster-location>-docker.pkg.dev
+```
+
+Then you can push the images directly from your local machine with `make push`.
 
 ### CI/CD
 

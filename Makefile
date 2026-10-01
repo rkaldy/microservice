@@ -3,11 +3,15 @@ help: # Show help for each of the Makefile recipes
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m: $$(echo $$l | cut -f 2- -d'#')\n"; done
 
 PROJECT_NAME := $(shell grep "name:" chart/Chart.yaml | head -n 1 | cut -d " " -f 2)
-# rename to your cloud docker registry
-DOCKER_REGISTRY := europe-central2-docker.pkg.dev/microservice-template-475915/docker
+BUILD_TARGET ?= dev
+
+TERRAGRUNT_INPUTS = cd terraform/platform/services && terragrunt render --json
+GCP_PROJECT_ID = $(shell $(TERRAGRUNT_INPUTS) | jq -r '.inputs.project_id')
+GCP_LOCATION = $(shell $(TERRAGRUNT_INPUTS) | jq -r '.inputs.cluster_location')
+DOCKER_REGISTRY ?= $(GCP_LOCATION)-docker.pkg.dev/$(GCP_PROJECT_ID)/docker
 IMAGE = $(DOCKER_REGISTRY)/$(PROJECT_NAME)
 TAG = $(shell git rev-parse --short=8 HEAD)
-BUILD_TARGET ?= dev
+
 CONTAINER_ID ?= $(PROJECT_NAME)-api-1
 COMPOSE_UP_ARGS ?=
 DOCKER_EXEC_FLAGS ?= -it
@@ -60,13 +64,13 @@ helm-template: # Render helm templates for BUILD_TARGET (default: dev). If TPL i
 		--values chart/values.$(BUILD_TARGET).yaml \
 		$(TPL_FLAG) $(PROJECT_NAME) chart/
 
-install: # Deploy the application to the dev cluster. The current revision must be pushed to docker registry first. Intentionally allows only development deploy to prevent accidentally rewriting production cluster.
+install: # Deploy the application to the k8s cluster. The current revision must be pushed to docker registry first.
 	helm upgrade --install \
-		--namespace $(PROJECT_NAME)-dev \
+		--namespace $(PROJECT_NAME)-$(BUILD_TARGET) \
 		--set image.repository="$(IMAGE)" \
 		--set image.tag="$(TAG)" \
 		--values chart/values.yaml \
-		--values chart/values.dev.yaml \
+		--values chart/values.$(BUILD_TARGET).yaml \
 		$(PROJECT_NAME) chart/
 
 uninstall: # Uninstall the application from the dev cluster. Intentionally allows only development deploy to prevent accidentally production cluster deletion.
