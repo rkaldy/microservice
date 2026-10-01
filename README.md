@@ -8,15 +8,15 @@ instead of repeating boilerplate.
 - **Application**: `src/app.py` boots the FastAPI server with simple Bearer authentication, health checks
   (`/-/liveness`, `/-/readiness`), a metrics endpoint (`/-/metrics`), and an example versioned router at
   `src/api/v1/router.py`.
-- **Data layer**: `src/db/engine.py` wraps SQLAlchemy with built-in retry/backoff logic, `src/db/connection.py`
-  exposes the async session, Alembic migrations live in `/alembic`, and `src/settings/base.py` centralizes the
+- **Data layer**: `src/db/engine.py` wraps the SQLAlchemy engine, `src/db/connection.py` wraps the SQLAlchemy connection
+  with optional retry/backoff logic. Alembic migrations live in `/alembic`, and `src/settings/base.py` centralizes the
   environment-specific configuration for PostgreSQL or MySQL.
-- **Observability and resilience**: Structured logging (`src/utils/log.py`), Prometheus counters (`src/metrics.py` and
+- **Observability and resilience**: Logging (`src/utils/log.py`), Prometheus counters (`src/metrics.py` and
   `PrometheusMetricsMiddleware`), and optional Sentry integration (`src/utils/sentry.py`) are wired in at startup so the
   service emits useful telemetry out of the box.
 - **Tooling and operations**: Poetry manages dependencies, the multi-stage `Dockerfile` targets dev and prod images,
   `docker-compose.yaml` orchestrates local services, Helm manifests live under `chart/`, Terraform modules under
-  `terraform/`, and CI pipelines under `gitlab-ci/`.
+  `terraform/`, and GitHub Actions workflows under `.github/workflows/`.
 - **Testing**: `tests/` ships with pytest suites that bootstrap an test database engine (`tests/engine.py`)
 - **Local run**: Use `docker-compose.yaml` for local containers, and lean on the `Makefile` targets for build, lint, and
   test workflows.
@@ -64,7 +64,7 @@ Use this template as a skeleton for your new project and update the following ar
 - Rename the `src` package to the new project name.
 - Update `Dockerfile`, `run-api-*.sh` scripts, and the `enable_all_loggers()` fixture to reflect the renamed package.
 - Set the project name in `pyproject.toml`.
-- Adjust the metadata in `run_api_app()` and `chart/Chart.yaml` (name, title, description, version, etc.).
+- Adjust the metadata in `create_api_app()` and `chart/Chart.yaml` (name, title, description, version, etc.).
 
 ### Python version
 
@@ -82,7 +82,7 @@ The template is prepared for either PostgreSQL or MySQL:
 
 ### Terraform
 
-Rename `terragrunt/root.hcl.example` to `terragrunt/root.hcl` and populate the variables to match
+Copy `terraform/config.hcl.example` to `terraform/config.hcl` and populate the variables to match
 your environment (project IDs, regions, secrets, etc.).
 
 ### Helm charts
@@ -100,7 +100,7 @@ before applying an application environment; do not use a long-lived Google servi
 ### Grafana
 
 1. In Grafana Cloud or Enterprise, navigate to **Get Started → Logs → Kubernetes** to generate the deployment wizard.
-2. Reuse the usernames for Loki and Prometheus targets inside `terraform/root.hcl`; do **not** deploy using
+2. Reuse the usernames for Loki and Prometheus targets inside `terraform/config.hcl`; do **not** deploy using
    Grafana’s generated manifests.
 3. Click **Create token** and store the token in Google Secret Manager under the key `grafana-password`.
 
@@ -130,11 +130,12 @@ services ─┬─> cluster ─> crds ─┐
           └─> cloud ───────────┴─> kubernetes
 ```
 
-For the initial bootstrap, copy `terraform/root.hcl.example` to `terrafrom/root.hcl` and fill all variable values.
+For the initial bootstrap, copy `terraform/config.hcl.example` to `terraform/config.hcl` and fill all variable values.
 Then run in the `terraform/platform` directory:
 
 ```bash
 gcloud auth application-default login
+terragrunt backend bootstrap
 terragrunt run --all init
 terragrunt run --all apply
 ```
@@ -197,5 +198,48 @@ make install
 
 ## CI/CD
 
-Pipeline automation is under active development. Review the files in `.github/workflows/` and adapt them to your project before
-enabling deployments in production.
+### Pull requests
+
+Opening a pull request against `master`, reopening it, or pushing another commit to it starts the branch workflow. GitHub checks
+out the pull request merge commit, so the pipeline validates the result of merging the branch with the current `master`, rather
+than testing the branch in isolation.
+
+The branch workflow:
+
+1. builds the development image;
+2. runs pre-commit checks and tests;
+3. builds and pushes an image tagged with the short Git commit SHA;
+4. deploys the image to the `dev` environment.
+
+Only one development pipeline runs at a time. A newer pull request run cancels the previous one because all pull requests share
+the same development cluster.
+
+### Merge to master
+
+Closing a pull request without merging it does not publish or deploy anything. After a pull request is merged into `master`, the
+master workflow runs the common pipeline with `ENVIRONMENT=stage`. It runs the checks and pushes a stage image, but does not
+automatically run `make install`.
+
+`ENVIRONMENT` determines both the Helm configuration and Docker build target:
+
+| `ENVIRONMENT` | Docker target | Helm values | Kubernetes namespace |
+|---|---|---|---|
+| `dev` | `dev` | `chart/values.dev.yaml` | `microservice-dev` |
+| `stage` | `prod` | `chart/values.stage.yaml` | `microservice-stage` |
+| `prod` | `prod` | `chart/values.prod.yaml` | `microservice-prod` |
+
+### Manual deployment
+
+To deploy stage or production:
+
+1. open **Actions** in the GitHub repository;
+2. select **CI (master)**;
+3. click **Run workflow**;
+4. select `stage` or `prod` in **Environment to deploy**;
+5. click **Run workflow** to confirm.
+
+The manual run repeats the build, checks, and image push before executing `make install` for the selected environment. The
+**Run workflow** button is available only after `master.yaml` exists on the repository's default branch.
+
+For additional production protection, configure required reviewers for the `prod` GitHub environment. GitHub will then pause
+the publish/deployment job until an authorized reviewer approves it.
