@@ -33,3 +33,23 @@ generate "required_providers" {
     }
   EOF
 }
+
+locals {
+  config = read_terragrunt_config(find_in_parent_folders("config.hcl"))
+}
+
+remote_state {
+  backend = "gcs"
+
+  generate = {
+    path      = "backend.generated.tf"
+    if_exists = "overwrite_terragrunt"
+  }
+
+  config = {
+    project  = local.config.inputs.project_id
+    location = local.config.inputs.cluster_location
+    bucket   = "${local.config.inputs.project_id}-terraform-state"
+    prefix = "${path_relative_to_include()}"
+  }
+}

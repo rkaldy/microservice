@@ -1,7 +1,7 @@
-include "root" {
-  path = find_in_parent_folders("root.hcl")
+include "config" {
+  path = find_in_parent_folders("config.hcl")
 }
 
-include "providers" {
-  path = find_in_parent_folders("providers.hcl")
+include "root" {
+  path = find_in_parent_folders("root.hcl")
 }
