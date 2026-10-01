@@ -60,7 +60,8 @@ class AsyncConnection:
     def is_retryable_error(self, err: DBAPIError) -> bool:
         db_type = self.database_type(self._conn.dialect.name)
         if db_type == DBType.MYSQL:
-            error_code = getattr(err.orig, "args", (None,))[0]
+            error_args = getattr(err.orig, "args", ())
+            error_code = error_args[0] if error_args else None
             return error_code in {
                 1205,  # lock wait timeout
                 1213,  # deadlock
