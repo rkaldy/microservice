@@ -1,12 +1,9 @@
 name: CI (development)
 
 on:
-  pull_request:
-    branches:
+  push:
+    branches-ignore:
       - master
-    types:
-      - opened
-      - synchronize
 
 permissions:
   contents: read
