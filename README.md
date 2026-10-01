@@ -33,12 +33,9 @@ instead of repeating boilerplate.
 
 ## Preparation
 
-### Create Google Cloud resources
+### Create Google project and configure tooling
 
-1. Create a new [Google Cloud project](https://console.cloud.google.com/projectcreate).
-2. Provision a new [GKE Autopilot cluster](https://console.cloud.google.com/kubernetes/list/overview) for deployments.
-
-### Authenticate and configure tooling
+Create a new [Google Cloud project](https://console.cloud.google.com/projectcreate).
 
 Log in with the Google Cloud CLI:
 
@@ -51,6 +48,12 @@ Set the default project configuration:
 ```bash
 gcloud config set project <your-project-id>
 ```
+
+### Prepare Github authentication
+
+- In your Github repository, create a fine grained personal access token (PAT).
+- Add permissions Actions (read-only), Administration (read and write) and Environments (read and write) for it.
+- Store the token value in Google Secret Manager with name `github-token`.
 
 ## Project Configuration
 
